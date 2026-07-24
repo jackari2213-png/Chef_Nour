@@ -128,8 +128,8 @@ export default function Header() {
                             >
                                 <BookOpen className="w-4 h-4 text-brand-500" />
                                 <span>متجر الكتب</span>
-                                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-red-100 text-red-600 rounded-full animate-pulse">
-                                    خصم 50%
+                                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-amber-100 text-amber-800 rounded-full">
+                                    قريباً
                                 </span>
                             </Link>
 
@@ -263,13 +263,14 @@ export default function Header() {
                             )}
                         </div>
 
-                        {/* Primary Action CTA: Get Cookbook */}
+                        {/* Primary Action CTA: Coming Soon Store */}
                         <Link
-                            href="/store/eid-sweets-cookbook"
-                            className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-bold text-xs px-5 py-2.5 rounded-2xl shadow-orange-glow transition-all hover:scale-105 active:scale-95"
+                            href="/store"
+                            className="hidden sm:flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs px-4.5 py-2.5 rounded-2xl shadow-orange-glow hover:scale-105 transition-all"
                         >
-                            <BookOpen className="w-4 h-4" />
+                            <BookOpen className="w-4 h-4 text-white" />
                             <span>احصل على كتاب الوصفات</span>
+                            <span className="bg-white/20 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full backdrop-blur-xs">قريباً</span>
                         </Link>
 
                         {/* Mobile Hamburger Toggle */}
@@ -373,7 +374,7 @@ export default function Header() {
                             className="text-lg font-bold text-brand-600 py-2 border-b border-gray-100 flex items-center justify-between"
                         >
                             <span>متجر الكتب الرقمية</span>
-                            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-extrabold">خصم 50%</span>
+                            <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-extrabold">قريباً</span>
                         </Link>
 
                         <Link

@@ -11,7 +11,6 @@ import {
     Sparkles,
     ArrowLeft,
     Star,
-    ShieldCheck,
     Users,
     Eye,
     Award
@@ -28,126 +27,91 @@ export default function HomePage() {
     const approvedReviews = reviews.filter(r => r.moderation_status === 'approved');
 
     return (
-        <div className="space-y-16 pb-20 overflow-hidden">
+        <div className="space-y-16 pb-20 overflow-hidden bg-[#FAF8F5]">
 
-            {/* 1. HERO SECTION (Split Layout strictly matching reference image) */}
-            <section className="relative bg-gradient-to-b from-orange-50/60 via-white to-surface-bg pt-8 pb-16 lg:py-20">
-
-                {/* Background Subtle Gradient Blobs */}
-                <div className="absolute top-10 right-10 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl -z-10 pointer-events-none" />
-                <div className="absolute bottom-10 left-10 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl -z-10 pointer-events-none" />
-
+            {/* 1. HERO SECTION — Matches reference design strictly */}
+            <section className="relative pt-10 pb-12 overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
                         {/* Right Column (Text Content & Stats) */}
                         <div className="lg:col-span-7 space-y-6 text-right">
 
-                            {/* Badge */}
-                            <div className="inline-flex items-center gap-2 bg-brand-100 text-brand-700 px-4 py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-sm">
-                                <Sparkles className="w-4 h-4 text-brand-600 animate-spin" />
-                                <span>وصفات مجربة وناجحة 100%</span>
+                            {/* Main Headline */}
+                            <div className="space-y-2">
+                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight tracking-tight">
+                                    وصفات مجربة وناجحة 100%
+                                    <br />
+                                    <span className="text-gray-900">من مطبخي إلى </span>
+                                    <span className="text-brand-500">مائدتك</span>
+                                </h1>
                             </div>
 
-                            {/* Main Headline */}
-                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.15] tracking-tight">
-                                من مطبخي إلى <span className="text-brand-500 underline decoration-brand-200 underline-offset-8">مائدتك</span>
-                            </h1>
-
                             {/* Subtitle Description */}
-                            <p className="text-gray-600 text-base sm:text-lg font-medium leading-relaxed max-w-2xl">
-                                اكتشفي أسرار الطبخ مع الشيف نور. أطباق مغربية أصيلة، حلويات فاخرة، وأفكار سهلة وسريعة لكل يوم بمقادير مضمونة 100%.
+                            <p className="text-gray-600 text-base sm:text-lg font-medium leading-relaxed max-w-xl">
+                                اكتشفي أسرار الطبخ مع الشيف نور.
+                                <br />
+                                أطباق، حلويات، وأفكار لكل يوم.
                             </p>
+
+                            {/* 3 Stats Boxes matching reference image */}
+                            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-md pt-2">
+                                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                                    <span className="block text-xl sm:text-2xl font-black text-brand-500">+3M</span>
+                                    <span className="text-[11px] sm:text-xs font-bold text-gray-400">مشاهدة شهرياً</span>
+                                </div>
+                                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                                    <span className="block text-xl sm:text-2xl font-black text-brand-500">+500</span>
+                                    <span className="text-[11px] sm:text-xs font-bold text-gray-400">وصفة</span>
+                                </div>
+                                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                                    <span className="block text-xl sm:text-2xl font-black text-brand-500">171K</span>
+                                    <span className="text-[11px] sm:text-xs font-bold text-gray-400">متابع</span>
+                                </div>
+                            </div>
 
                             {/* Buttons Row */}
                             <div className="flex flex-wrap items-center gap-4 pt-2">
                                 <Link
                                     href="/recipes"
-                                    className="bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm sm:text-base px-8 py-4 rounded-2xl shadow-orange-glow hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                                    className="bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm px-8 py-3.5 rounded-2xl shadow-orange-glow hover:scale-105 transition-all"
                                 >
-                                    <span>تصفح الوصفات</span>
-                                    <ArrowLeft className="w-5 h-5" />
+                                    تصفح الوصفات
                                 </Link>
 
                                 <Link
-                                    href="/store/eid-sweets-cookbook"
-                                    className="bg-white hover:bg-orange-50 text-gray-800 hover:text-brand-600 border-2 border-gray-200 font-extrabold text-sm sm:text-base px-6 py-3.5 rounded-2xl transition-all flex items-center gap-2 shadow-sm"
+                                    href="/store"
+                                    className="bg-white hover:bg-orange-50 text-gray-800 border-2 border-gray-200 font-extrabold text-sm px-6 py-3 rounded-2xl transition-all flex items-center gap-2 shadow-sm"
                                 >
                                     <Moon className="w-4 h-4 text-amber-500" />
                                     <span>حمل كتاب رمضان</span>
                                 </Link>
                             </div>
 
-                            {/* Verified Chef Profile Badge */}
-                            <div className="pt-4 flex items-center gap-3">
-                                <div className="relative">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150&q=80"
-                                        alt="الشيف نور"
-                                        className="w-12 h-12 rounded-full object-cover ring-4 ring-white shadow-md"
-                                    />
-                                    <CheckCircle2 className="w-5 h-5 text-blue-500 bg-white rounded-full absolute -bottom-1 -right-1 fill-current" />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="font-extrabold text-sm text-gray-900">الشيف نور</span>
-                                        <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">شيف معتمد</span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 font-medium">خبيرة الطبخ التقليدي والمودرن</p>
-                                </div>
-                            </div>
-
-                            {/* Stats Counters Bar strictly matching reference design */}
-                            <div className="pt-6 border-t border-gray-200/80 grid grid-cols-3 gap-4 max-w-lg">
-                                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-                                    <span className="block text-2xl sm:text-3xl font-black text-brand-500">+3M</span>
-                                    <span className="text-xs font-bold text-gray-500">مشاهدة شهرياً</span>
-                                </div>
-                                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-                                    <span className="block text-2xl sm:text-3xl font-black text-gray-900">+500</span>
-                                    <span className="text-xs font-bold text-gray-500">وصفة مجربة</span>
-                                </div>
-                                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-                                    <span className="block text-2xl sm:text-3xl font-black text-gray-900">171K</span>
-                                    <span className="text-xs font-bold text-gray-500">متابع وفية</span>
-                                </div>
-                            </div>
-
                         </div>
 
-                        {/* Left Column (Main Hero Visual Dish matching reference) */}
-                        <div className="lg:col-span-5 relative">
-                            <div className="relative mx-auto max-w-md lg:max-w-none">
+                        {/* Left Column (Circular Food Dish matching reference image) */}
+                        <div className="lg:col-span-5 relative flex justify-center">
+                            <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-square">
 
-                                {/* Outer Glow Ring */}
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand-500 to-amber-400 blur-2xl opacity-20 transform scale-95" />
+                                {/* Outer subtle shadow ring */}
+                                <div className="absolute inset-0 rounded-full bg-orange-500/10 blur-2xl scale-95" />
 
-                                {/* Main Circular Hero Image */}
-                                <div className="relative aspect-square rounded-full p-4 bg-white/70 backdrop-blur-md shadow-2xl border border-white/50 overflow-hidden">
+                                {/* Circular Dish Image */}
+                                <div className="relative w-full h-full rounded-full p-2 bg-white shadow-2xl overflow-hidden border-4 border-white">
                                     <img
-                                        src="https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=1000&q=80"
-                                        alt="طاجين مغربي فاخر الشيف نور"
-                                        className="w-full h-full object-cover rounded-full shadow-inner hover:scale-105 transition-transform duration-700"
+                                        src="https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=85"
+                                        alt="طاجين الشيف نور"
+                                        className="w-full h-full object-cover rounded-full"
                                     />
                                 </div>
 
-                                {/* Floating Badge top left over image */}
-                                <div className="absolute top-6 left-2 sm:left-4 z-20 bg-gray-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl shadow-xl border border-white/10 flex items-center gap-2 animate-bounce">
-                                    <Flame className="w-5 h-5 text-orange-400 fill-current" />
-                                    <div>
-                                        <span className="block text-xs font-bold text-orange-300">+3M</span>
+                                {/* Top Right Floating Pill Badge matching reference */}
+                                <div className="absolute top-4 right-2 sm:right-4 bg-black/75 backdrop-blur-md text-white px-3.5 py-2 rounded-2xl shadow-xl border border-white/20 flex items-center gap-2">
+                                    <Flame className="w-4 h-4 text-orange-400 fill-current" />
+                                    <div className="text-right">
+                                        <span className="block text-xs font-black text-white">+3M</span>
                                         <span className="text-[10px] text-gray-300">مشاهدة شهرياً</span>
-                                    </div>
-                                </div>
-
-                                {/* Floating Recipe Pill bottom right */}
-                                <div className="absolute bottom-6 right-2 sm:right-4 z-20 bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-brand-600 font-bold">
-                                        ⭐ 4.9
-                                    </div>
-                                    <div>
-                                        <span className="block text-xs font-extrabold text-gray-900">طاجين الدجاج الأصيل</span>
-                                        <span className="text-[10px] text-gray-500 font-medium">الوصفة الأكثر تقييماً 🔥</span>
                                     </div>
                                 </div>
 
@@ -155,8 +119,18 @@ export default function HomePage() {
                         </div>
 
                     </div>
+
+                    {/* Carousel Navigation Dots under Hero matching reference */}
+                    <div className="flex items-center justify-center gap-2 pt-8">
+                        <span className="w-2.5 h-2.5 rounded-full bg-brand-500" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                    </div>
+
                 </div>
             </section>
+
+
 
             {/* 2. CATEGORIES CAROUSEL SECTION ("تصفح حسب الفئة") */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -223,31 +197,38 @@ export default function HomePage() {
             {/* 4. VIDEO REELS SECTION */}
             <VideoReels />
 
-            {/* 5. COOKBOOK BANNER PROMO ("دليلك الشامل لنجاح حلويات العيد") */}
+            {/* 5. COOKBOOK COMING SOON TEASER */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="relative bg-gradient-to-r from-orange-50 via-amber-50/50 to-orange-100/40 rounded-3xl p-6 sm:p-10 border border-brand-200 shadow-soft overflow-hidden">
+
+                    {/* Background decoration */}
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
+
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
-                        {/* Left Col (Book Cover Image) */}
-                        <div className="lg:col-span-5 flex justify-center">
-                            <div className="relative group max-w-[280px]">
+                        {/* Book Cover */}
+                        <div className="lg:col-span-4 flex justify-center">
+                            <div className="relative group max-w-[220px]">
                                 <div className="absolute inset-0 bg-brand-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
                                 <img
                                     src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80"
                                     alt="كتاب حلويات العيد الشيف نور"
-                                    className="relative rounded-2xl shadow-2xl border-4 border-white object-cover transform -rotate-2 group-hover:rotate-0 transition-transform duration-300"
+                                    className="relative rounded-2xl shadow-2xl border-4 border-white object-cover transform -rotate-2 group-hover:rotate-0 transition-transform duration-300 opacity-80"
                                 />
-                                <span className="absolute top-3 right-3 bg-red-500 text-white font-black text-xs px-3 py-1 rounded-full shadow-md z-10">
-                                    خصم 50%
-                                </span>
+                                {/* Coming Soon overlay */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="bg-amber-500 text-white font-black text-sm px-4 py-2 rounded-2xl shadow-lg rotate-[-6deg]">
+                                        قريباً
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Right Col (Book Content & Pricing) */}
-                        <div className="lg:col-span-7 text-right space-y-5">
-                            <div className="inline-flex items-center gap-2 bg-brand-500 text-white px-3.5 py-1.5 rounded-full text-xs font-black shadow-sm">
+                        {/* Content */}
+                        <div className="lg:col-span-8 text-right space-y-4">
+                            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-3.5 py-1.5 rounded-full text-xs font-black border border-amber-200">
                                 <BookOpen className="w-4 h-4" />
-                                <span>إصدار حصري ممتاز</span>
+                                <span>كتاب رقمي قيد الإعداد</span>
                             </div>
 
                             <h2 className="text-2xl sm:text-4xl font-black text-gray-900 leading-tight">
@@ -255,11 +236,10 @@ export default function HomePage() {
                             </h2>
 
                             <p className="text-gray-600 text-sm sm:text-base leading-relaxed font-medium">
-                                أكثر من 30 وصفة مجربة بمقادير مضبوطة وأسرار الشيف نور للحصول على نتيجة مثالية من المرة الأولى!
+                                أكثر من 30 وصفة مجربة بمقادير مضبوطة وأسرار الشيف نور — الكتاب قيد الإعداد وسيكون متاحاً قريباً.
                             </p>
 
-                            {/* Highlights List */}
-                            <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm font-bold text-gray-800">
+                            <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm font-bold text-gray-700">
                                 <div className="flex items-center gap-2">
                                     <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
                                     <span>30 وصفة مضمونة</span>
@@ -276,33 +256,18 @@ export default function HomePage() {
                                     <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
                                     <span>صور احترافية لكل وصفة</span>
                                 </div>
-                                <div className="flex items-center gap-2 col-span-2">
-                                    <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
-                                    <span>تحديثات مجانية مدى الحياة</span>
-                                </div>
                             </div>
 
-                            {/* Pricing & CTA */}
-                            <div className="pt-4 border-t border-brand-200/60 flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex items-baseline gap-3">
-                                    <span className="text-3xl sm:text-4xl font-black text-brand-600">49 درهم</span>
-                                    <span className="text-sm font-bold text-gray-400 line-through">99 درهم</span>
-                                    <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md">وفر 50 درهم</span>
-                                </div>
-
+                            <div className="pt-4 border-t border-brand-200/60 flex flex-wrap items-center gap-3">
                                 <Link
-                                    href="/store/eid-sweets-cookbook"
-                                    className="bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm sm:text-base px-8 py-3.5 rounded-2xl shadow-orange-glow hover:scale-105 active:scale-95 transition-all"
+                                    href="/store"
+                                    className="bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm px-7 py-3.5 rounded-2xl shadow-orange-glow hover:scale-105 transition-all flex items-center gap-2"
                                 >
-                                    اشتري الآن ← 49 درهم
+                                    <BookOpen className="w-4 h-4" />
+                                    <span>أعلميني عند الإطلاق</span>
                                 </Link>
+                                <span className="text-xs text-gray-400 font-medium">سيتم إعلامك فور نشر الكتاب</span>
                             </div>
-
-                            <div className="flex items-center gap-2 text-[11px] text-gray-500 font-medium">
-                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                                <span>ضمان استرجاع لمدة 30 يوم • تحميل فوري بعد الدفع مباشرة</span>
-                            </div>
-
                         </div>
 
                     </div>
@@ -374,6 +339,6 @@ export default function HomePage() {
                 </div>
             </section>
 
-        </div>
+        </div >
     );
 }

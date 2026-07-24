@@ -205,6 +205,20 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </div>
                     )}
                 </div>
+
+                {/* 4 Thumbnail Gallery row matching reference image */}
+                <div className="grid grid-cols-4 gap-3 max-w-2xl mx-auto">
+                    {[
+                        recipe.main_image,
+                        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&q=80',
+                        'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&q=80',
+                        'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=400&q=80',
+                    ].map((imgUrl, idx) => (
+                        <div key={idx} className="aspect-square rounded-2xl overflow-hidden border-2 border-white shadow-md hover:scale-105 transition-transform cursor-pointer">
+                            <img src={imgUrl} alt="صورة إضافية" className="w-full h-full object-cover" />
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* 4. Metadata Badges Row matching reference design */}

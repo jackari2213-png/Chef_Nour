@@ -136,10 +136,10 @@ export default function Footer() {
                             احصلي على نسخة PDF عالية الدقة تضم 30 وصفة مضمونة ومجربة مع خطوات توضيحية.
                         </p>
                         <Link
-                            href="/store/eid-sweets-cookbook"
+                            href="/store"
                             className="inline-block w-full bg-brand-500 hover:bg-brand-600 text-white text-center text-xs font-bold py-2.5 rounded-xl transition-colors"
                         >
-                            شراء الكتاب - 49 درهم
+                            تصفح المتجر (قريباً)
                         </Link>
                     </div>
 

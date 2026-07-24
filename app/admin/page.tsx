@@ -122,8 +122,8 @@ export default function AdminDashboardPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-gray-900 rounded-3xl p-5 border border-gray-800 space-y-3">
-                    <div className="flex items-center justify-between text-gray-400">
+                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-brand-500/50 transition-all">
+                    <div className="flex items-center justify-between text-slate-400">
                         <span className="text-xs font-bold">الوصفات المنشورة</span>
                         <Utensils className="w-5 h-5 text-brand-500" />
                     </div>
@@ -132,8 +132,8 @@ export default function AdminDashboardPage() {
                         <span className="text-xs font-bold text-emerald-400">+{MOCK_ADMIN_STATS.total_recipes_change}</span>
                     </div>
                 </div>
-                <div className="bg-gray-900 rounded-3xl p-5 border border-gray-800 space-y-3">
-                    <div className="flex items-center justify-between text-gray-400">
+                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-blue-500/50 transition-all">
+                    <div className="flex items-center justify-between text-slate-400">
                         <span className="text-xs font-bold">مبيعات الكتب</span>
                         <BookOpen className="w-5 h-5 text-blue-500" />
                     </div>
@@ -142,8 +142,8 @@ export default function AdminDashboardPage() {
                         <span className="text-xs font-bold text-emerald-400">+12%</span>
                     </div>
                 </div>
-                <div className="bg-gray-900 rounded-3xl p-5 border border-gray-800 space-y-3">
-                    <div className="flex items-center justify-between text-gray-400">
+                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-amber-500/50 transition-all">
+                    <div className="flex items-center justify-between text-slate-400">
                         <span className="text-xs font-bold">تعليقات جديدة</span>
                         <MessageSquare className="w-5 h-5 text-amber-500" />
                     </div>
@@ -152,8 +152,8 @@ export default function AdminDashboardPage() {
                         <span className="text-xs font-bold text-amber-400">في الانتظار</span>
                     </div>
                 </div>
-                <div className="bg-gray-900 rounded-3xl p-5 border border-gray-800 space-y-3">
-                    <div className="flex items-center justify-between text-gray-400">
+                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-purple-500/50 transition-all">
+                    <div className="flex items-center justify-between text-slate-400">
                         <span className="text-xs font-bold">إجمالي المشاهدات</span>
                         <Eye className="w-5 h-5 text-purple-500" />
                     </div>
@@ -168,8 +168,8 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                 {/* Moderation Inbox */}
-                <div className="lg:col-span-7 bg-gray-900 rounded-3xl p-6 border border-gray-800 space-y-4">
-                    <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div className="lg:col-span-7 bg-slate-800 rounded-3xl p-6 border border-slate-700 space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-700 pb-3">
                         <h3 className="text-lg font-black text-white flex items-center gap-2">
                             <MessageSquare className="w-5 h-5 text-brand-500" />
                             التعليقات في انتظار الموافقة ({pendingReviews.length})
@@ -178,13 +178,13 @@ export default function AdminDashboardPage() {
                     <div className="space-y-3">
                         {pendingReviews.length > 0 ? (
                             pendingReviews.map(rev => (
-                                <div key={rev.id} className="bg-gray-950 p-4 rounded-2xl border border-gray-800 flex items-center justify-between gap-4">
+                                <div key={rev.id} className="bg-slate-900/90 p-4 rounded-2xl border border-slate-700 flex items-center justify-between gap-4 hover:bg-slate-800/80 transition-colors">
                                     <div className="flex items-center gap-3 text-right flex-1 min-w-0">
                                         <img src={rev.user_avatar} alt={rev.user_name} className="w-10 h-10 rounded-full object-cover shrink-0" />
                                         <div className="min-w-0">
                                             <h4 className="font-extrabold text-xs text-white">{rev.user_name}</h4>
                                             <p className="text-[11px] text-brand-400 font-bold">{rev.recipe_title_ar}</p>
-                                            <p className="text-xs text-gray-300 truncate">{rev.comment}</p>
+                                            <p className="text-xs text-slate-300 truncate">{rev.comment}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
@@ -200,9 +200,9 @@ export default function AdminDashboardPage() {
                                 </div>
                             ))
                         ) : (
-                            <div className="text-center py-8">
-                                <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
-                                <p className="text-xs text-gray-500 font-medium">لا توجد تعليقات معلقة</p>
+                            <div className="text-center py-8 bg-slate-900/40 rounded-2xl border border-slate-700/50">
+                                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
+                                <p className="text-xs text-slate-400 font-medium">جميع التعليقات تمت مراجعتها وموافقتها بالكامل</p>
                             </div>
                         )}
                     </div>
@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
                 {/* Quick Actions Sidebar */}
                 <div className="lg:col-span-5 space-y-4">
                     {/* Add Recipe CTA */}
-                    <div className="bg-gradient-to-br from-brand-500 to-brand-700 rounded-3xl p-6 text-white space-y-3">
+                    <div className="bg-gradient-to-br from-brand-500 to-brand-700 rounded-3xl p-6 text-white space-y-3 shadow-orange-glow">
                         <ChefHat className="w-8 h-8" />
                         <h3 className="text-lg font-black">نشر وصفة جديدة</h3>
                         <p className="text-xs text-orange-100 font-medium">أضيفي وصفة كاملة مع المقادير والخطوات والصور</p>
@@ -225,14 +225,14 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {/* Recent Recipes list */}
-                    <div className="bg-gray-900 rounded-3xl p-5 border border-gray-800 space-y-3">
-                        <h4 className="text-xs font-black text-white border-b border-gray-800 pb-2">آخر 5 وصفات منشورة</h4>
+                    <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3">
+                        <h4 className="text-xs font-black text-white border-b border-slate-700 pb-2">آخر 5 وصفات منشورة</h4>
                         {recipes.slice(0, 5).map(r => (
-                            <div key={r.id} className="flex items-center gap-3">
+                            <div key={r.id} className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-slate-700/50 transition-colors">
                                 <img src={r.main_image} alt={r.title_ar} className="w-8 h-8 rounded-lg object-cover" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-gray-200 truncate">{r.title_ar}</p>
-                                    <p className="text-[10px] text-gray-500">{r.category_name_ar}</p>
+                                    <p className="text-xs font-bold text-slate-200 truncate">{r.title_ar}</p>
+                                    <p className="text-[10px] text-slate-400">{r.category_name_ar}</p>
                                 </div>
                                 <span className="text-[10px] text-emerald-400 font-bold shrink-0">منشور</span>
                             </div>

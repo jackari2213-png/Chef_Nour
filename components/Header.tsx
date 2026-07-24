@@ -65,7 +65,7 @@ export default function Header() {
                         </Link>
 
                         {/* Desktop Navigation Links */}
-                        <nav className="hidden lg:flex items-center gap-1 mr-6">
+                        <nav className="hidden lg:flex items-center gap-1 ms-6">
                             <Link
                                 href="/"
                                 className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${pathname === '/' ? 'text-brand-600 bg-brand-50' : 'text-gray-700 hover:text-brand-600 hover:bg-gray-50'}`}
@@ -88,7 +88,7 @@ export default function Header() {
                                 </Link>
 
                                 {categoryDropdownOpen && (
-                                    <div className="absolute top-full right-0 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="absolute top-full right-0 w-64 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100/80 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                                         <div className="px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                             التصنيفات الرئيسية
                                         </div>
@@ -218,7 +218,7 @@ export default function Header() {
 
                             {/* User Dropdown */}
                             {userDropdownOpen && user && (
-                                <div className="absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                                <div className="absolute top-full left-0 mt-2 w-52 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100/80 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-2 border-b border-gray-100">
                                         <p className="text-xs font-bold text-gray-900">{user.full_name}</p>
                                         <p className="text-[11px] text-gray-500 truncate">{user.email}</p>

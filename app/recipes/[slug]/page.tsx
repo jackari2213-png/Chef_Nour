@@ -223,18 +223,24 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 </div>
             </div>
 
-            {/* 5. Description */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
-                <p className="text-gray-700 text-sm sm:text-base leading-relaxed font-medium">
-                    {recipe.description_ar}
-                </p>
+            {/* 5. Mobile Quick Jump Navigation Pills (visible only on mobile/tablet) */}
+            <div className="lg:hidden flex items-center justify-center gap-2 bg-white/90 backdrop-blur-md p-2 rounded-2xl border border-gray-200 shadow-sm sticky top-16 z-30">
+                <a href="#ingredients-section" className="flex-1 text-center bg-orange-50 hover:bg-orange-100 text-brand-700 font-extrabold text-xs py-2.5 rounded-xl border border-orange-200 transition-colors">
+                    🥕 المقادير ({recipe.ingredients.length})
+                </a>
+                <a href="#steps-section" className="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold text-xs py-2.5 rounded-xl border border-gray-200 transition-colors">
+                    🍳 التحضير ({recipe.steps.length})
+                </a>
+                <a href="#reviews-section" className="flex-1 text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs py-2.5 rounded-xl border border-emerald-200 transition-colors">
+                    💬 التعليقات
+                </a>
             </div>
 
             {/* 6. Main Split Content: Ingredients Checklist & Step-by-Step Instructions */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
 
                 {/* Right Col in RTL: Interactive Ingredients Checklist */}
-                <div className="lg:col-span-4 bg-white rounded-3xl p-6 border border-gray-100 shadow-card space-y-4 sticky top-28">
+                <div id="ingredients-section" className="lg:col-span-4 bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-card space-y-4 lg:sticky lg:top-28 scroll-mt-28">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                         <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
                             <Utensils className="w-5 h-5 text-brand-500" />
@@ -293,7 +299,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 </div>
 
                 {/* Left Col in RTL: Step-by-Step Preparation Instructions */}
-                <div className="lg:col-span-8 space-y-6">
+                <div id="steps-section" className="lg:col-span-8 space-y-6 scroll-mt-28">
                     <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                         <h3 className="text-xl font-black text-gray-900">طريقة التحضير</h3>
                         <span className="text-xs font-bold text-gray-400">{recipe.steps.length} خطوات</span>
@@ -329,7 +335,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
             </div>
 
             {/* 7. Community Discussion Thread */}
-            <section className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-card space-y-6">
+            <section id="reviews-section" className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-card space-y-6 scroll-mt-28">
                 <div className="border-b border-gray-100 pb-4 text-right">
                     <h2 className="text-2xl font-black text-gray-900 mb-1">تطبيقاتكم وآراؤكم</h2>
                     <p className="text-xs text-gray-500 font-medium">شاركينا تجربتك مع الوصفة وتفاعلي مع مجتمع الشيف نور!</p>

@@ -89,15 +89,12 @@ export default function HomePage() {
                                 {/* Outer subtle shadow ring */}
                                 <div className="absolute inset-0 rounded-full bg-orange-500/10 blur-2xl scale-95" />
 
-                                {/* Circular Dish Image Container with Strict Constraints */}
-                                <div className="relative w-full h-full aspect-square rounded-full p-2 bg-white shadow-2xl overflow-hidden border-4 border-white flex items-center justify-center">
+                                {/* Circular Chef Nour Portrait */}
+                                <div className="relative w-full h-full aspect-square rounded-full overflow-hidden border-4 border-white shadow-2xl bg-orange-50 flex items-center justify-center">
                                     <img
-                                        src="https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=85"
-                                        alt="طاجين الشيف نور"
-                                        className="w-full h-full aspect-square object-cover rounded-full block"
-                                        onError={(e) => {
-                                            e.currentTarget.src = 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=800&q=80';
-                                        }}
+                                        src="/chef-nour.jpg"
+                                        alt="الشيف نور"
+                                        className="w-full h-full object-cover object-top rounded-full block"
                                     />
                                 </div>
 

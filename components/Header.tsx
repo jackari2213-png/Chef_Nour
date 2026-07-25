@@ -44,31 +44,39 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-40 w-full glass-header border-b border-gray-100 shadow-sm transition-all">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20">
+        <header className="sticky top-0 z-40 w-full transition-all">
+            {/* Top Announcement Banner - Cleanforms style */}
+            <div className="bg-brand-500 text-white text-[11px] sm:text-xs font-bold py-2 px-4 text-center tracking-wide flex items-center justify-center gap-2">
+                <span>📖 كتب وصفات الشيف نور الرقمية — قريباً جداً</span>
+                <span className="opacity-40">|</span>
+                <span className="hidden sm:inline">وصفات مجربة وناجحة 100% بمقادير مضبوطة</span>
+            </div>
 
-                    {/* Right side in RTL: Brand Logo & Title */}
-                    <div className="flex items-center gap-6">
-                        <Link href="/" className="flex items-center gap-3 group">
-                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-500 flex items-center justify-center text-white shadow-orange-glow group-hover:scale-105 transition-transform">
-                                <ChefHat className="w-6 h-6" />
+            {/* Main Clean Header Bar */}
+            <div className="bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16 sm:h-20">
+
+                        {/* Brand Logo & Title */}
+                        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                                <ChefHat className="w-5 h-5" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-extrabold text-2xl tracking-tight text-gray-900 leading-tight">
+                                <span className="font-black text-xl sm:text-2xl tracking-tight text-gray-900 leading-none">
                                     الشيف نور
                                 </span>
-                                <span className="text-xs font-medium text-brand-600 -mt-1 tracking-wide">
-                                    وصفات مجربة 100%
+                                <span className="text-[10px] font-bold text-brand-600 tracking-wider">
+                                    CHEF NOUR®
                                 </span>
                             </div>
                         </Link>
 
-                        {/* Desktop Navigation Links */}
-                        <nav className="hidden lg:flex items-center gap-1 ms-6">
+                        {/* Centered Desktop Navigation Links - CLEANFORMS style */}
+                        <nav className="hidden lg:flex items-center gap-8 mx-auto">
                             <Link
                                 href="/"
-                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${pathname === '/' ? 'text-brand-600 bg-brand-50' : 'text-gray-700 hover:text-brand-600 hover:bg-gray-50'}`}
+                                className={`text-sm font-bold transition-colors ${pathname === '/' ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                             >
                                 الرئيسية
                             </Link>
@@ -81,206 +89,112 @@ export default function Header() {
                             >
                                 <Link
                                     href="/recipes"
-                                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-colors ${pathname.startsWith('/recipes') ? 'text-brand-600 bg-brand-50' : 'text-gray-700 hover:text-brand-600 hover:bg-gray-50'}`}
+                                    className={`text-sm font-bold flex items-center gap-1 transition-colors ${pathname.startsWith('/recipes') ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                                 >
                                     <span>الوصفات</span>
-                                    <ChevronDown className="w-4 h-4" />
+                                    <ChevronDown className="w-3.5 h-3.5 opacity-60" />
                                 </Link>
 
                                 {categoryDropdownOpen && (
-                                    <div className="absolute top-full right-0 w-64 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100/80 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <div className="px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                            التصنيفات الرئيسية
+                                    <div className="absolute top-full right-0 w-60 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                                        <div className="px-4 py-1 text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
+                                            التصنيفات
                                         </div>
                                         {MOCK_CATEGORIES.map((cat) => (
                                             <Link
                                                 key={cat.id}
                                                 href={`/category/${cat.slug}`}
-                                                className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors"
+                                                className="flex items-center justify-between px-4 py-2 text-xs font-bold text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors"
                                                 onClick={() => setCategoryDropdownOpen(false)}
                                             >
-                                                <span className="flex items-center gap-2">
-                                                    <span className="w-2 h-2 rounded-full bg-brand-500"></span>
-                                                    {cat.name_ar}
-                                                </span>
-                                                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-semibold">
+                                                <span>{cat.name_ar}</span>
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-semibold">
                                                     {cat.recipe_count}
                                                 </span>
                                             </Link>
                                         ))}
-                                        <div className="border-t border-gray-100 my-1 pt-1">
-                                            <Link
-                                                href="/recipes"
-                                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-brand-600 hover:underline"
-                                                onClick={() => setCategoryDropdownOpen(false)}
-                                            >
-                                                <Utensils className="w-3.5 h-3.5" />
-                                                تصفح جميع الوصفات →
-                                            </Link>
-                                        </div>
                                     </div>
                                 )}
                             </div>
 
                             <Link
                                 href="/store"
-                                className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-colors ${pathname.startsWith('/store') ? 'text-brand-600 bg-brand-50' : 'text-gray-700 hover:text-brand-600 hover:bg-gray-50'}`}
+                                className={`text-sm font-bold flex items-center gap-1.5 transition-colors ${pathname.startsWith('/store') ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                             >
-                                <BookOpen className="w-4 h-4 text-brand-500" />
                                 <span>متجر الكتب</span>
-                                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-amber-100 text-amber-800 rounded-full">
+                                <span className="px-2 py-0.5 text-[9px] font-black bg-amber-100 text-amber-800 rounded-full">
                                     قريباً
                                 </span>
                             </Link>
 
                             <Link
                                 href="/contact"
-                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${pathname === '/contact' ? 'text-brand-600 bg-brand-50' : 'text-gray-700 hover:text-brand-600 hover:bg-gray-50'}`}
+                                className={`text-sm font-bold transition-colors ${pathname === '/contact' ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                             >
                                 تواصل معنا
                             </Link>
                         </nav>
-                    </div>
 
-                    {/* Left side in RTL: Actions, Search, User & Primary CTA */}
-                    <div className="flex items-center gap-3">
-
-                        {/* Search Trigger Button */}
-                        <button
-                            onClick={() => setIsSearchOpen(true)}
-                            className="p-2.5 rounded-xl text-gray-600 hover:text-brand-600 hover:bg-gray-100 transition-colors"
-                            aria-label="بحث عن وصفة"
-                        >
-                            <Search className="w-5 h-5" />
-                        </button>
-
-                        {/* Language Switcher */}
-                        <div className="relative hidden sm:flex items-center gap-1 bg-gray-100 p-1 rounded-xl text-xs font-bold text-gray-600">
+                        {/* Right Action Icons - Clean Minimal Outline Icons */}
+                        <div className="flex items-center gap-3">
+                            {/* Search */}
                             <button
-                                onClick={() => setLanguage('ar')}
-                                className={`px-2.5 py-1 rounded-lg transition-colors ${language === 'ar' ? 'bg-white text-brand-600 shadow-sm' : 'hover:text-gray-900'}`}
+                                onClick={() => setIsSearchOpen(true)}
+                                className="p-2 text-gray-700 hover:text-brand-600 transition-colors"
+                                aria-label="بحث"
+                                title="بحث عن وصفة"
                             >
-                                AR
+                                <Search className="w-5 h-5" />
                             </button>
-                            <button
-                                onClick={() => setLanguage('fr')}
-                                className={`px-2.5 py-1 rounded-lg transition-colors ${language === 'fr' ? 'bg-white text-brand-600 shadow-sm' : 'hover:text-gray-900'}`}
-                            >
-                                FR
-                            </button>
-                            <button
-                                onClick={() => setLanguage('en')}
-                                className={`px-2.5 py-1 rounded-lg transition-colors ${language === 'en' ? 'bg-white text-brand-600 shadow-sm' : 'hover:text-gray-900'}`}
-                            >
-                                EN
-                            </button>
-                        </div>
 
-                        {/* Favorites Icon Button */}
-                        <Link
-                            href="/favorites"
-                            className="relative p-2.5 rounded-xl text-gray-600 hover:text-red-500 hover:bg-red-50 transition-colors"
-                            title="المفضلة"
-                        >
-                            <Heart className="w-5 h-5" />
-                            {favorites.length > 0 && (
-                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                                    {favorites.length}
-                                </span>
-                            )}
-                        </Link>
-
-                        {/* User Account / Profile */}
-                        <div className="relative">
-                            {user ? (
-                                <button
-                                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                                    className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-100 transition-colors"
-                                >
-                                    <img
-                                        src={user.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80'}
-                                        alt={user.full_name}
-                                        className="w-8 h-8 rounded-full object-cover ring-2 ring-brand-500"
-                                    />
-                                    <span className="hidden md:inline text-xs font-bold text-gray-800">
-                                        {user.full_name}
+                            {/* Favorites */}
+                            <Link
+                                href="/favorites"
+                                className="relative p-2 text-gray-700 hover:text-red-500 transition-colors"
+                                title="المفضلة"
+                            >
+                                <Heart className="w-5 h-5" />
+                                {favorites.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                                        {favorites.length}
                                     </span>
-                                </button>
-                            ) : (
-                                <Link
-                                    href="/login"
-                                    className="p-2.5 rounded-xl text-gray-600 hover:text-brand-600 hover:bg-gray-100 transition-colors"
-                                    title="تسجيل الدخول"
-                                >
-                                    <User className="w-5 h-5" />
-                                </Link>
-                            )}
+                                )}
+                            </Link>
 
-                            {/* User Dropdown */}
-                            {userDropdownOpen && user && (
-                                <div className="absolute top-full left-0 mt-2 w-52 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100/80 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="px-4 py-2 border-b border-gray-100">
-                                        <p className="text-xs font-bold text-gray-900">{user.full_name}</p>
-                                        <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
-                                    </div>
-                                    {user.role === 'admin' && (
-                                        <Link
-                                            href="/admin"
-                                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-brand-600 bg-orange-50 hover:bg-orange-100"
-                                            onClick={() => setUserDropdownOpen(false)}
-                                        >
-                                            <ChefHat className="w-4 h-4" />
-                                            لوحة تحكم الأدمن
-                                        </Link>
-                                    )}
-                                    <Link
-                                        href="/profile"
-                                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50"
-                                        onClick={() => setUserDropdownOpen(false)}
-                                    >
-                                        <User className="w-4 h-4" />
-                                        الملف الشخصي
-                                    </Link>
-                                    <Link
-                                        href="/orders"
-                                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50"
-                                        onClick={() => setUserDropdownOpen(false)}
-                                    >
-                                        <ShoppingBag className="w-4 h-4" />
-                                        مشترواتي (الكتب)
-                                    </Link>
+                            {/* User Profile / Admin */}
+                            <div className="relative">
+                                {user ? (
                                     <button
-                                        onClick={() => {
-                                            logout();
-                                            setUserDropdownOpen(false);
-                                        }}
-                                        className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 text-right"
+                                        onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                                        className="p-1 rounded-full text-gray-700 hover:text-brand-600 transition-colors"
                                     >
-                                        <LogOut className="w-4 h-4" />
-                                        تسجيل الخروج
+                                        <img
+                                            src={user.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80'}
+                                            alt={user.full_name}
+                                            className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-500"
+                                        />
                                     </button>
-                                </div>
-                            )}
+                                ) : (
+                                    <Link
+                                        href="/login"
+                                        className="p-2 text-gray-700 hover:text-brand-600 transition-colors"
+                                        title="حسابي"
+                                    >
+                                        <User className="w-5 h-5" />
+                                    </Link>
+                                )}
+                            </div>
+
+                            {/* Mobile Menu Toggle */}
+                            <button
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                className="lg:hidden p-2 text-gray-700 hover:text-brand-600 transition-colors"
+                                aria-label="القائمة"
+                            >
+                                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            </button>
                         </div>
 
-                        {/* Primary Action CTA: Coming Soon Store */}
-                        <Link
-                            href="/store"
-                            className="hidden sm:flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs px-4.5 py-2.5 rounded-2xl shadow-orange-glow hover:scale-105 transition-all"
-                        >
-                            <BookOpen className="w-4 h-4 text-white" />
-                            <span>احصل على كتاب الوصفات</span>
-                            <span className="bg-white/20 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full backdrop-blur-xs">قريباً</span>
-                        </Link>
-
-                        {/* Mobile Hamburger Toggle */}
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="lg:hidden p-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors"
-                            aria-label="القائمة"
-                        >
-                            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                        </button>
                     </div>
                 </div>
             </div>

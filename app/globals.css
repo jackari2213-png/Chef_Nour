@@ -21,7 +21,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   background-color: var(--color-bg);
   color: var(--color-text-dark);
   font-family: var(--font-arabic);
@@ -52,6 +53,7 @@ html, body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -77,4 +79,79 @@ html, body {
 .card-hover-effect:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Cooking Background Floating Animations ─────────────────────────── */
+@keyframes cookFloat1 {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(var(--tw-rotate, 0deg)) scale(1);
+  }
+
+  33% {
+    transform: translateY(-14px) rotate(var(--tw-rotate, 0deg)) scale(1.03);
+  }
+
+  66% {
+    transform: translateY(-6px) rotate(var(--tw-rotate, 0deg)) scale(0.98);
+  }
+}
+
+@keyframes cookFloat2 {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(var(--tw-rotate, 0deg)) scale(1);
+  }
+
+  40% {
+    transform: translateY(-18px) rotate(var(--tw-rotate, 0deg)) scale(1.04);
+  }
+
+  70% {
+    transform: translateY(-8px) rotate(var(--tw-rotate, 0deg)) scale(0.97);
+  }
+}
+
+@keyframes cookFloat3 {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(var(--tw-rotate, 0deg)) scale(1);
+  }
+
+  50% {
+    transform: translateY(-12px) rotate(var(--tw-rotate, 0deg)) scale(1.02);
+  }
+}
+
+@keyframes cookSpin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.cook-float-1 {
+  animation: cookFloat1 7s ease-in-out infinite;
+}
+
+.cook-float-2 {
+  animation: cookFloat2 9s ease-in-out infinite;
+}
+
+.cook-float-3 {
+  animation: cookFloat3 11s ease-in-out infinite;
+}
+
+.cook-spin {
+  animation: cookSpin 12s linear infinite;
 }

@@ -5,6 +5,7 @@ import './globals.css';
 import { AppProvider } from '@/lib/store';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CookingBackground from '@/components/CookingBackground';
 
 const tajawal = Tajawal({
     subsets: ['arabic'],
@@ -38,8 +39,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="ar" dir="rtl" className={`${tajawal.variable} ${cairo.variable}`}>
-            <body className="font-sans bg-surface-bg text-gray-900 antialiased selection:bg-brand-500 selection:text-white min-h-screen flex flex-col justify-between">
+            <body className="font-sans bg-surface-bg text-gray-900 antialiased selection:bg-brand-500 selection:text-white min-h-screen flex flex-col justify-between relative">
                 <AppProvider>
+                    <CookingBackground />
                     <Header />
                     <main className="flex-grow">
                         {children}

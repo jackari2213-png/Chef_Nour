@@ -78,14 +78,6 @@ export default function HomePage() {
                                 >
                                     تصفح الوصفات
                                 </Link>
-
-                                <Link
-                                    href="/store"
-                                    className="bg-white hover:bg-orange-50 text-gray-800 border-2 border-gray-200 font-extrabold text-sm px-6 py-3 rounded-2xl transition-all flex items-center gap-2 shadow-sm"
-                                >
-                                    <Moon className="w-4 h-4 text-amber-500" />
-                                    <span>حمل كتاب رمضان</span>
-                                </Link>
                             </div>
 
                         </div>
@@ -199,83 +191,6 @@ export default function HomePage() {
 
             {/* 4. VIDEO REELS SECTION */}
             <VideoReels />
-
-            {/* 5. COOKBOOK COMING SOON TEASER */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="relative bg-gradient-to-r from-orange-50 via-amber-50/50 to-orange-100/40 rounded-3xl p-6 sm:p-10 border border-brand-200 shadow-soft overflow-hidden">
-
-                    {/* Background decoration */}
-                    <div className="absolute top-0 left-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-
-                        {/* Book Cover */}
-                        <div className="lg:col-span-4 flex justify-center">
-                            <div className="relative group max-w-[220px]">
-                                <div className="absolute inset-0 bg-brand-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
-                                <img
-                                    src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80"
-                                    alt="كتاب حلويات العيد الشيف نور"
-                                    className="relative rounded-2xl shadow-2xl border-4 border-white object-cover transform -rotate-2 group-hover:rotate-0 transition-transform duration-300 opacity-80"
-                                />
-                                {/* Coming Soon overlay */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="bg-amber-500 text-white font-black text-sm px-4 py-2 rounded-2xl shadow-lg rotate-[-6deg]">
-                                        قريباً
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="lg:col-span-8 text-right space-y-4">
-                            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-3.5 py-1.5 rounded-full text-xs font-black border border-amber-200">
-                                <BookOpen className="w-4 h-4" />
-                                <span>كتاب رقمي قيد الإعداد</span>
-                            </div>
-
-                            <h2 className="text-2xl sm:text-4xl font-black text-gray-900 leading-tight">
-                                دليلك الشامل لنجاح حلويات العيد
-                            </h2>
-
-                            <p className="text-gray-600 text-sm sm:text-base leading-relaxed font-medium">
-                                أكثر من 30 وصفة مجربة بمقادير مضبوطة وأسرار الشيف نور — الكتاب قيد الإعداد وسيكون متاحاً قريباً.
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm font-bold text-gray-700">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
-                                    <span>30 وصفة مضمونة</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
-                                    <span>مقادير مضبوطة</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
-                                    <span>أسرار الشيف</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
-                                    <span>صور احترافية لكل وصفة</span>
-                                </div>
-                            </div>
-
-                            <div className="pt-4 border-t border-brand-200/60 flex flex-wrap items-center gap-3">
-                                <Link
-                                    href="/store"
-                                    className="bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm px-7 py-3.5 rounded-2xl shadow-orange-glow hover:scale-105 transition-all flex items-center gap-2"
-                                >
-                                    <BookOpen className="w-4 h-4" />
-                                    <span>أعلميني عند الإطلاق</span>
-                                </Link>
-                                <span className="text-xs text-gray-400 font-medium">سيتم إعلامك فور نشر الكتاب</span>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
 
             {/* 5. COMMUNITY REVIEWS SECTION ("تطبيقاتكم وآراؤكم" strictly matching reference image) */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

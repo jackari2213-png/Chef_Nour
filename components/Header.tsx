@@ -169,7 +169,7 @@ export default function Header() {
                                         className="p-1 rounded-full text-gray-700 hover:text-brand-600 transition-colors"
                                     >
                                         <img
-                                            src={user.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80'}
+                                            src={user.avatar_url || '/chef-nour.jpg'}
                                             alt={user.full_name}
                                             className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-500"
                                         />

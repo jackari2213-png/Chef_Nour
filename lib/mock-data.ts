@@ -397,7 +397,7 @@ export const MOCK_USER_PROFILE: UserProfile = {
     id: 'usr-admin',
     full_name: 'الشيف نور',
     email: 'chefnour@example.com',
-    avatar_url: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150&q=80',
+    avatar_url: '/chef-nour.jpg',
     role: 'admin',
     created_at: '2025-01-01T00:00:00Z',
 };

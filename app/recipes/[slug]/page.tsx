@@ -169,7 +169,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
                     <div className="flex items-center gap-2 border-r border-gray-200 pr-6">
                         <img
-                            src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150&q=80"
+                            src="/chef-nour.jpg"
                             alt="الشيف نور"
                             className="w-6 h-6 rounded-full object-cover ring-2 ring-brand-500"
                         />

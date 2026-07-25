@@ -80,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="pt-6 border-t border-gray-800 space-y-3">
                     <div className="flex items-center gap-3">
                         <img
-                            src={user?.avatar_url || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150&q=80'}
+                            src={user?.avatar_url || '/chef-nour.jpg'}
                             alt="الشيف نور"
                             className="w-9 h-9 rounded-full object-cover ring-2 ring-brand-500"
                         />

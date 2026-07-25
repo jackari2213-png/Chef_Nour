@@ -61,18 +61,21 @@ export interface Recipe {
 
 export interface Review {
     id: string;
+    parent_id?: string | null;        // null = top-level; string = reply to that id
     user_id: string;
     user_name: string;
     user_avatar?: string;
+    is_admin?: boolean;               // true = Chef Nour (shows special badge)
     recipe_id: string;
     recipe_title_ar?: string;
-    rating: number;
+    rating: number;                   // 0 for replies (no rating)
     comment: string;
     photo_url?: string;
     chef_reply?: string;
     likes_count?: number;
     moderation_status: ModerationStatus;
     created_at: string;
+    replies?: Review[];               // hydrated client-side from flat list
 }
 
 export interface Product {

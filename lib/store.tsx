@@ -25,6 +25,7 @@ interface AppContextType {
     // Reviews & Moderation
     reviews: Review[];
     addReview: (review: Omit<Review, 'id' | 'created_at' | 'moderation_status'>) => void;
+    addReply: (parentId: string, comment: string, isAdmin: boolean) => void;
     approveReview: (id: string) => void;
     rejectReview: (id: string) => void;
     deleteReview: (id: string) => void;
@@ -172,6 +173,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
+    const addReply = (parentId: string, comment: string, isAdmin: boolean) => {
+        const parent = reviews.find(r => r.id === parentId);
+        const reply: Review = {
+            id: 'rev-' + Date.now(),
+            parent_id: parentId,
+            user_id: isAdmin ? 'usr-admin' : (user?.id || 'usr-guest'),
+            user_name: isAdmin ? 'الشيف نور' : (user?.full_name || 'زائر'),
+            user_avatar: isAdmin ? '/chef-nour.jpg' : (user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80'),
+            is_admin: isAdmin,
+            recipe_id: parent?.recipe_id || '',
+            recipe_title_ar: parent?.recipe_title_ar,
+            rating: 0,
+            comment,
+            moderation_status: 'approved',
+            created_at: new Date().toISOString(),
+        };
+        setReviews(prev => {
+            const next = [...prev, reply];
+            saveToStorage('chef_nour_reviews', next);
+            return next;
+        });
+    };
+
     const approveReview = (id: string) => {
         setReviews(prev => {
             const next = prev.map(r => r.id === id ? { ...r, moderation_status: 'approved' as const } : r);
@@ -235,6 +259,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 deleteRecipe,
                 reviews,
                 addReview,
+                addReply,
                 approveReview,
                 rejectReview,
                 deleteReview,

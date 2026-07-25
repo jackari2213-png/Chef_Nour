@@ -16,15 +16,15 @@ import {
     Award
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { MOCK_CATEGORIES, MOCK_REVIEWS } from '@/lib/mock-data';
+import { MOCK_CATEGORIES } from '@/lib/mock-data';
 import RecipeCard from '@/components/RecipeCard';
 import CategoryCard from '@/components/CategoryCard';
 import VideoReels from '@/components/VideoReels';
+import CommentThread from '@/components/CommentThread';
 
 export default function HomePage() {
-    const { recipes, reviews } = useApp();
+    const { recipes } = useApp();
     const trendingRecipes = recipes.slice(0, 6);
-    const approvedReviews = reviews.filter(r => r.moderation_status === 'approved');
 
     return (
         <div className="space-y-16 pb-20 overflow-hidden bg-[#FAF8F5]">
@@ -281,9 +281,9 @@ export default function HomePage() {
             {/* 4. VIDEO REELS SECTION */}
             <VideoReels />
 
-            {/* 5. COMMUNITY REVIEWS SECTION ("تطبيقاتكم وآراؤكم" strictly matching reference image) */}
+            {/* 5. COMMUNITY DISCUSSION SECTION */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-right mb-10">
+                <div className="text-right mb-8">
                     <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-3.5 py-1 rounded-full text-xs font-extrabold mb-2">
                         <Users className="w-4 h-4" />
                         <span>مجتمع الشيف نور</span>
@@ -292,58 +292,11 @@ export default function HomePage() {
                         تطبيقاتكم وآراؤكم
                     </h2>
                     <p className="text-xs sm:text-sm text-gray-500 font-medium mt-1">
-                        صور حقيقية وتجارب ناجحة لنساء وجدن متعة الطبخ معنا
+                        صور حقيقية وتجارب ناجحة — شاركي وتفاعلي مع مجتمع الشيف نور
                     </p>
                 </div>
 
-                {/* Reviews Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {approvedReviews.map((rev) => (
-                        <div key={rev.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-card flex flex-col justify-between space-y-4">
-                            <div>
-                                {/* User Header */}
-                                <div className="flex items-center gap-3 mb-3">
-                                    <img
-                                        src={rev.user_avatar}
-                                        alt={rev.user_name}
-                                        className="w-10 h-10 rounded-full object-cover ring-2 ring-brand-500"
-                                    />
-                                    <div>
-                                        <h4 className="font-extrabold text-sm text-gray-900">{rev.user_name}</h4>
-                                        <div className="flex text-amber-500 text-xs">
-                                            {[...Array(rev.rating)].map((_, i) => (
-                                                <Star key={i} className="w-3 h-3 fill-current" />
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Review Text */}
-                                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium mb-3">
-                                    "{rev.comment}"
-                                </p>
-
-                                {/* User Submitted Dish Photo */}
-                                {rev.photo_url && (
-                                    <div className="rounded-2xl overflow-hidden aspect-video bg-gray-100 mb-3 border border-gray-100">
-                                        <img src={rev.photo_url} alt="تطبيق الوصفة" className="w-full h-full object-cover hover:scale-105 transition-transform" />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Chef Verified Reply */}
-                            {rev.chef_reply && (
-                                <div className="bg-orange-50/80 p-3 rounded-2xl border border-orange-100 text-xs text-brand-900">
-                                    <div className="flex items-center gap-1 font-bold text-brand-700 mb-1">
-                                        <ChefHat className="w-3.5 h-3.5" />
-                                        <span>رد الشيف نور:</span>
-                                    </div>
-                                    <p className="text-[11px] leading-snug">{rev.chef_reply}</p>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
+                <CommentThread limit={3} showForm={true} />
             </section>
 
         </div >

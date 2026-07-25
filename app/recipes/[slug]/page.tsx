@@ -31,10 +31,11 @@ import { useApp } from '@/lib/store';
 import { MOCK_RECIPES } from '@/lib/mock-data';
 import RecipeCard from '@/components/RecipeCard';
 import CookingTimer from '@/components/CookingTimer';
+import CommentThread from '@/components/CommentThread';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
-    const { recipes, isFavorite, toggleFavorite, reviews, addReview, user } = useApp();
+    const { recipes, isFavorite, toggleFavorite, user } = useApp();
 
     // Find recipe or fallback to first recipe (e.g. Chicken Tagine)
     const recipe = recipes.find(r => r.slug === slug) || recipes[1] || MOCK_RECIPES[1];
@@ -47,13 +48,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
     // Fullscreen Cooking Mode state
     const [cookingModeOpen, setCookingModeOpen] = useState<boolean>(false);
     const [cookingStep, setCookingStep] = useState<number>(0);
-
-    // Community Review Form state
-    const [rating, setRating] = useState<number>(5);
-    const [commentText, setCommentText] = useState<string>('');
-    const [photoUrl, setPhotoUrl] = useState<string>('');
-    const [reviewSubmitted, setReviewSubmitted] = useState<boolean>(false);
-
     // Select all / Toggle all ingredients
     const allChecked = recipe.ingredients.every(i => checkedIngredients[i.id]);
 
@@ -65,26 +59,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
             recipe.ingredients.forEach(i => { next[i.id] = true; });
             setCheckedIngredients(next);
         }
-    };
-
-    const handleReviewSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!commentText.trim()) return;
-
-        addReview({
-            user_id: user?.id || 'guest-user',
-            user_name: user?.full_name || 'متابعة وفية',
-            user_avatar: user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
-            recipe_id: recipe.id,
-            recipe_title_ar: recipe.title_ar,
-            rating,
-            comment: commentText,
-            photo_url: photoUrl || undefined,
-        });
-
-        setReviewSubmitted(true);
-        setCommentText('');
-        setPhotoUrl('');
     };
 
     const handlePrint = () => {
@@ -104,7 +78,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
         }
     };
 
-    const recipeReviews = reviews.filter(r => r.recipe_id === recipe.id && r.moderation_status === 'approved');
     const relatedRecipes = recipes.filter(r => r.id !== recipe.id).slice(0, 3);
 
     return (
@@ -355,99 +328,17 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
             </div>
 
-            {/* 7. Community Reviews & Photo Submissions */}
-            <section className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-card space-y-8">
+            {/* 7. Community Discussion Thread */}
+            <section className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-card space-y-6">
                 <div className="border-b border-gray-100 pb-4 text-right">
-                    <h2 className="text-2xl font-black text-gray-900 mb-1">تطبيقاتكم وآراؤكم لهذا الطبق</h2>
-                    <p className="text-xs text-gray-500 font-medium">شاركينا تقييمك وصورة تطبيقك لهذه الوصفات لتظهر في مجتمعنا!</p>
+                    <h2 className="text-2xl font-black text-gray-900 mb-1">تطبيقاتكم وآراؤكم</h2>
+                    <p className="text-xs text-gray-500 font-medium">شاركينا تجربتك مع الوصفة وتفاعلي مع مجتمع الشيف نور!</p>
                 </div>
-
-                {/* Form to submit review */}
-                {reviewSubmitted ? (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 text-center font-bold text-xs flex items-center justify-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>شكراً لك! تم إرسال تقييمك وصورتك وسوف يتم مراجعتها وتفعيلها فوراً</span>
-                    </div>
-                ) : (
-                    <form onSubmit={handleReviewSubmit} className="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-4">
-                        <h4 className="text-xs font-extrabold text-gray-800">أضيفي رأيك وتطبيقك:</h4>
-
-                        {/* Stars Selector */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-gray-500">التقييم:</span>
-                            <div className="flex gap-1 text-amber-400">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
-                                        key={star}
-                                        type="button"
-                                        onClick={() => setRating(star)}
-                                        className="p-1 hover:scale-125 transition-transform"
-                                    >
-                                        <Star className={`w-5 h-5 ${star <= rating ? 'fill-current' : 'text-gray-300'}`} />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Comment Area */}
-                        <textarea
-                            rows={3}
-                            required
-                            placeholder="كتبي رأيك أو ملاحظاتك عن نضج وطعم الوصفة..."
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            className="w-full bg-white border border-gray-200 rounded-xl p-3 text-xs font-semibold text-gray-900 focus:outline-none focus:border-brand-500"
-                        />
-
-                        {/* Photo Upload URL Mock */}
-                        <div className="flex flex-col sm:flex-row items-center gap-3">
-                            <div className="relative w-full">
-                                <input
-                                    type="url"
-                                    placeholder="رابط صورة تطبيقك (اختياري)"
-                                    value={photoUrl}
-                                    onChange={(e) => setPhotoUrl(e.target.value)}
-                                    className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-xs font-semibold text-gray-900 focus:outline-none"
-                                />
-                                <Camera className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs px-6 py-2.5 rounded-xl shrink-0 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <span>نشر التقييم</span>
-                                <Send className="w-3.5 h-3.5" />
-                            </button>
-                        </div>
-                    </form>
-                )}
-
-                {/* Display Reviews */}
-                <div className="space-y-4">
-                    {recipeReviews.length > 0 ? (
-                        recipeReviews.map((rev) => (
-                            <div key={rev.id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <img src={rev.user_avatar} alt={rev.user_name} className="w-8 h-8 rounded-full object-cover" />
-                                        <span className="font-extrabold text-xs text-gray-900">{rev.user_name}</span>
-                                    </div>
-                                    <div className="flex text-amber-400 text-xs">
-                                        {[...Array(rev.rating)].map((_, i) => (
-                                            <Star key={i} className="w-3 h-3 fill-current" />
-                                        ))}
-                                    </div>
-                                </div>
-                                <p className="text-xs text-gray-700 leading-relaxed">{rev.comment}</p>
-                                {rev.photo_url && (
-                                    <img src={rev.photo_url} alt="تطبيق" className="w-32 h-24 rounded-xl object-cover border border-gray-200 mt-2" />
-                                )}
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-xs text-gray-400 text-center font-medium py-4">كوني الأولى في تقييم هذه الوصفة!</p>
-                    )}
-                </div>
+                <CommentThread
+                    recipeId={recipe.id}
+                    recipeTitle={recipe.title_ar}
+                    showForm={true}
+                />
             </section>
 
             {/* 8. Fullscreen Distraction-Free Cooking Mode Modal */}

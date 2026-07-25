@@ -66,36 +66,36 @@ const ICONS: Record<string, React.FC<{ className?: string }>> = {
 
 const FLOATING_ICONS = [
     // Top-right area
-    { icon: 'chefHat', top: '4%', right: '3%', size: 72, opacity: 0.06, animClass: 'cook-float-1', rotate: 15 },
-    { icon: 'star', top: '8%', right: '14%', size: 18, opacity: 0.18, animClass: 'cook-spin', rotate: 0 },
-    { icon: 'whisk', top: '16%', right: '7%', size: 44, opacity: 0.07, animClass: 'cook-float-2', rotate: 30 },
+    { icon: 'chefHat', top: '4%', right: '3%', size: 76, opacity: 0.14, animClass: 'cook-float-1', rotate: 15 },
+    { icon: 'star', top: '8%', right: '14%', size: 20, opacity: 0.25, animClass: 'cook-spin', rotate: 0 },
+    { icon: 'whisk', top: '16%', right: '7%', size: 48, opacity: 0.15, animClass: 'cook-float-2', rotate: 30 },
 
     // Top-left area
-    { icon: 'pot', top: '6%', left: '4%', size: 64, opacity: 0.05, animClass: 'cook-float-3', rotate: -10 },
-    { icon: 'star', top: '14%', left: '12%', size: 14, opacity: 0.15, animClass: 'cook-spin', rotate: 45 },
-    { icon: 'flame', top: '22%', left: '6%', size: 36, opacity: 0.07, animClass: 'cook-float-1', rotate: -5 },
+    { icon: 'pot', top: '6%', left: '4%', size: 70, opacity: 0.13, animClass: 'cook-float-3', rotate: -10 },
+    { icon: 'star', top: '14%', left: '12%', size: 16, opacity: 0.22, animClass: 'cook-spin', rotate: 45 },
+    { icon: 'flame', top: '22%', left: '6%', size: 40, opacity: 0.15, animClass: 'cook-float-1', rotate: -5 },
 
     // Mid-right
-    { icon: 'fork', top: '38%', right: '1%', size: 56, opacity: 0.05, animClass: 'cook-float-2', rotate: 20 },
-    { icon: 'star', top: '44%', right: '8%', size: 12, opacity: 0.20, animClass: 'cook-spin', rotate: 0 },
+    { icon: 'fork', top: '38%', right: '2%', size: 60, opacity: 0.12, animClass: 'cook-float-2', rotate: 20 },
+    { icon: 'star', top: '44%', right: '8%', size: 14, opacity: 0.25, animClass: 'cook-spin', rotate: 0 },
 
     // Mid-left
-    { icon: 'spatula', top: '42%', left: '1%', size: 50, opacity: 0.05, animClass: 'cook-float-3', rotate: -20 },
-    { icon: 'star', top: '50%', left: '7%', size: 10, opacity: 0.18, animClass: 'cook-spin', rotate: 0 },
+    { icon: 'spatula', top: '42%', left: '2%', size: 54, opacity: 0.12, animClass: 'cook-float-3', rotate: -20 },
+    { icon: 'star', top: '50%', left: '7%', size: 12, opacity: 0.22, animClass: 'cook-spin', rotate: 0 },
 
     // Lower-right
-    { icon: 'bowl', top: '65%', right: '3%', size: 58, opacity: 0.06, animClass: 'cook-float-1', rotate: 10 },
-    { icon: 'star', top: '72%', right: '11%', size: 16, opacity: 0.16, animClass: 'cook-spin', rotate: 20 },
-    { icon: 'chefHat', top: '80%', right: '5%', size: 40, opacity: 0.05, animClass: 'cook-float-2', rotate: -8 },
+    { icon: 'bowl', top: '65%', right: '3%', size: 62, opacity: 0.14, animClass: 'cook-float-1', rotate: 10 },
+    { icon: 'star', top: '72%', right: '11%', size: 18, opacity: 0.22, animClass: 'cook-spin', rotate: 20 },
+    { icon: 'chefHat', top: '80%', right: '5%', size: 46, opacity: 0.12, animClass: 'cook-float-2', rotate: -8 },
 
     // Lower-left
-    { icon: 'whisk', top: '68%', left: '2%', size: 52, opacity: 0.05, animClass: 'cook-float-3', rotate: 25 },
-    { icon: 'flame', top: '78%', left: '5%', size: 32, opacity: 0.07, animClass: 'cook-float-1', rotate: 5 },
-    { icon: 'star', top: '85%', left: '10%', size: 12, opacity: 0.14, animClass: 'cook-spin', rotate: 0 },
+    { icon: 'whisk', top: '68%', left: '2%', size: 56, opacity: 0.13, animClass: 'cook-float-3', rotate: 25 },
+    { icon: 'flame', top: '78%', left: '5%', size: 36, opacity: 0.15, animClass: 'cook-float-1', rotate: 5 },
+    { icon: 'star', top: '85%', left: '10%', size: 14, opacity: 0.20, animClass: 'cook-spin', rotate: 0 },
 
     // Center scattered
-    { icon: 'star', top: '30%', left: '48%', size: 10, opacity: 0.12, animClass: 'cook-spin', rotate: 0 },
-    { icon: 'star', top: '60%', left: '52%', size: 8, opacity: 0.10, animClass: 'cook-spin', rotate: 0 },
+    { icon: 'star', top: '30%', left: '48%', size: 12, opacity: 0.18, animClass: 'cook-spin', rotate: 0 },
+    { icon: 'star', top: '60%', left: '52%', size: 10, opacity: 0.16, animClass: 'cook-spin', rotate: 0 },
 ];
 
 export default function CookingBackground() {

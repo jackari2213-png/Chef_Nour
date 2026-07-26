@@ -123,6 +123,37 @@ CREATE TABLE IF NOT EXISTS public.orders (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 11. SITE SETTINGS TABLE (Social links, banner text, active Giveaway credentials)
+CREATE TABLE IF NOT EXISTS public.site_settings (
+    id INT PRIMARY KEY DEFAULT 1,
+    chef_name TEXT DEFAULT 'الشيف نور',
+    chef_avatar TEXT DEFAULT '/chef-nour.jpg',
+    bio_ar TEXT DEFAULT 'منصة طهي مغربية أصيلة. وصفات مجربة وناجحة 100% بمقادير مضبوطة وأسرار احترافية من المطبخ مباشرةً إلى مائدتك.',
+    instagram_url TEXT DEFAULT 'https://instagram.com/chefnour',
+    youtube_url TEXT DEFAULT 'https://youtube.com/@chefnour',
+    tiktok_url TEXT DEFAULT 'https://tiktok.com/@chefnour',
+    facebook_url TEXT DEFAULT 'https://facebook.com/chefnour',
+    whatsapp_number TEXT DEFAULT '+212600000000',
+    email TEXT DEFAULT 'contact@chefnour.ma',
+    announcement_banner_text TEXT DEFAULT '📖 كتب وصفات الشيف نور الرقمية — قريباً جداً | وصفات مجربة وناجحة 100% بمقادير مضبوطة',
+    giveaway_active BOOLEAN DEFAULT TRUE,
+    giveaway_title TEXT DEFAULT '🎁 هدية مجتمعي الكبرى - عجانة كهربائية فاخرة + كتاب الحلويات مجاناً!',
+    giveaway_description TEXT DEFAULT 'شاركي معنا في سحب العيد الكبير للفوز بعجانة احترافية ونسخة مجانية من كتاب الشيف نور الجديد. اضغطي للتسجيل والمشاركة!',
+    giveaway_image_url TEXT DEFAULT 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80',
+    giveaway_end_date TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '14 days'
+);
+
+-- 12. COOKING REELS TABLE (Dynamic list of video reels)
+CREATE TABLE IF NOT EXISTS public.cooking_reels (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    duration TEXT DEFAULT '3:00',
+    views_count TEXT DEFAULT '0',
+    thumb_url TEXT NOT NULL,
+    video_url TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- ========================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ========================================================
@@ -133,6 +164,8 @@ ALTER TABLE public.ingredients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.steps ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cooking_reels ENABLE ROW LEVEL SECURITY;
 
 -- Public READ policies
 CREATE POLICY "Public categories are viewable by everyone" ON public.categories FOR SELECT USING (true);
@@ -141,6 +174,8 @@ CREATE POLICY "Public ingredients are viewable by everyone" ON public.ingredient
 CREATE POLICY "Public steps are viewable by everyone" ON public.steps FOR SELECT USING (true);
 CREATE POLICY "Public approved reviews are viewable by everyone" ON public.reviews FOR SELECT USING (moderation_status = 'approved');
 CREATE POLICY "Public products are viewable by everyone" ON public.products FOR SELECT USING (published = true);
+CREATE POLICY "Public site settings are viewable by everyone" ON public.site_settings FOR SELECT USING (true);
+CREATE POLICY "Public cooking reels are viewable by everyone" ON public.cooking_reels FOR SELECT USING (true);
 
 -- Authenticated User INSERT policies
 CREATE POLICY "Authenticated users can post reviews" ON public.reviews FOR INSERT WITH CHECK (true);
@@ -193,3 +228,22 @@ INSERT INTO public.reviews (id, user_name, user_avatar, recipe_id, recipe_title_
 -- Admin Reply
 INSERT INTO public.reviews (user_name, user_avatar, recipe_id, parent_id, comment, is_admin, moderation_status) VALUES
 ('الشيف نور', '/chef-nour.jpg', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'c1111111-1111-1111-1111-111111111111', 'بالصحة والعافية أختي أم كريمة! فرحتيني بزاف بتطبيقك الممتاز 👌❤️', true, 'approved');
+
+-- Insert Site Settings Seed
+INSERT INTO public.site_settings (id, chef_name, chef_avatar, bio_ar, instagram_url, youtube_url, tiktok_url, facebook_url, whatsapp_number, email, announcement_banner_text, giveaway_active, giveaway_title, giveaway_description, giveaway_image_url) VALUES
+(1, 'الشيف نور', '/chef-nour.jpg', 'منصة طهي مغربية أصيلة. وصفات مجربة وناجحة 100% بمقادير مضبوطة وأسرار احترافية من المطبخ مباشرةً إلى مائدتك.', 'https://instagram.com/chefnour', 'https://youtube.com/@chefnour', 'https://tiktok.com/@chefnour', 'https://facebook.com/chefnour', '+212600000000', 'contact@chefnour.ma', '📖 كتب وصفات الشيف نور الرقمية — قريباً جداً | وصفات مجربة وناجحة 100% بمقادير مضبوطة', true, '🎁 هدية مجتمعي الكبرى - عجانة كهربائية فاخرة + كتاب الحلويات مجاناً!', 'شاركي معنا في سحب العيد الكبير للفوز بعجانة احترافية ونسخة مجانية من كتاب الشيف نور الجديد. اضغطي للتسجيل والمشاركة!', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80')
+ON CONFLICT (id) DO UPDATE SET
+    chef_name = EXCLUDED.chef_name,
+    instagram_url = EXCLUDED.instagram_url,
+    youtube_url = EXCLUDED.youtube_url,
+    tiktok_url = EXCLUDED.tiktok_url,
+    facebook_url = EXCLUDED.facebook_url;
+
+-- Insert Cooking Reels Seeds
+INSERT INTO public.cooking_reels (id, title, duration, views_count, thumb_url, video_url) VALUES
+('d1111111-1111-1111-1111-111111111111', 'سر الكسكس المغربي المثالي', '3:42', '842K', 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&q=80', 'https://www.youtube.com/embed/s_P-_EgMJuI?autoplay=1'),
+('d2222222-2222-2222-2222-222222222222', 'طاجين الدجاج الأصيل خطوة بخطوة', '5:18', '1.2M', 'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=400&q=80', 'https://www.youtube.com/embed/q8Q3mJ_vSCo?autoplay=1'),
+('d3333333-3333-3333-3333-333333333333', 'حلوى الشباكية المغربية السريعة', '4:05', '560K', 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=400&q=80', 'https://www.youtube.com/embed/KFHyzmLsKEI?autoplay=1'),
+('d4444444-4444-4444-4444-444444444444', 'كيكة البرتقال الرطبة والمحببة', '6:10', '980K', 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80', 'https://www.youtube.com/embed/IWNVT3bGv4A?autoplay=1')
+ON CONFLICT (id) DO NOTHING;
+

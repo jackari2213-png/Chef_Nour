@@ -16,6 +16,7 @@ import {
     Image as ImageIcon,
     ArrowUp,
     ArrowDown,
+    Upload,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { MOCK_CATEGORIES } from '@/lib/mock-data';
@@ -66,6 +67,30 @@ export default function AdminDashboardPage() {
 
     const removeGalleryImage = (index: number) => {
         setGalleryImages(prev => prev.filter((_, idx) => idx !== index));
+    };
+
+    // File Upload Handler for PC / Mobile
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean = false) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        Array.from(files).forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const result = event.target?.result as string;
+                if (result) {
+                    if (isMain) {
+                        setMainImage(result);
+                    } else {
+                        setGalleryImages(prev => [...prev, result]);
+                    }
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Reset input value so same file can be selected again
+        e.target.value = '';
     };
 
     // Ingredient helpers
@@ -322,29 +347,64 @@ export default function AdminDashboardPage() {
                                 </div>
 
                                 {/* Multi-Image & Gallery Management Section */}
-                                <div className="sm:col-span-2 space-y-3 bg-gray-950 p-4 rounded-2xl border border-gray-800">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-xs font-black text-white flex items-center gap-1.5">
+                                <div className="sm:col-span-2 space-y-4 bg-gray-950 p-4 sm:p-5 rounded-2xl border border-gray-800 shadow-inner">
+                                    <div className="flex items-center justify-between border-b border-gray-800 pb-2.5">
+                                        <label className="text-xs font-black text-white flex items-center gap-2">
                                             <ImageIcon className="w-4 h-4 text-brand-500" />
                                             معرض صور الوصفة (الصورة الرئيسية + الصور الإضافية)
                                         </label>
-                                        <span className="text-[10px] text-gray-400">إجمالي {1 + galleryImages.length} صور</span>
+                                        <span className="text-[10px] bg-brand-950 text-brand-400 font-extrabold px-2.5 py-1 rounded-full border border-brand-800">
+                                            إجمالي {1 + galleryImages.length} صور
+                                        </span>
                                     </div>
 
-                                    {/* Input Main Image */}
-                                    <div>
-                                        <label className="text-[11px] font-bold text-gray-400 block mb-1">رابط الصورة الرئيسية (Cover)</label>
-                                        <input type="url" value={mainImage} onChange={e => setMainImage(e.target.value)}
-                                            className="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-500" />
+                                    {/* 1. Main Cover Image Section */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-bold text-gray-300 block">الصورة الرئيسية (Cover Image)</label>
+                                        <div className="flex flex-col sm:flex-row items-stretch gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="أدخل رابط الصورة (URL) أو ارفع ملف من جهازك..."
+                                                value={mainImage.startsWith('data:') ? '📷 صورة مرفوعة من الجهاز' : mainImage}
+                                                onChange={e => setMainImage(e.target.value)}
+                                                className="flex-1 bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                                            />
+                                            <label className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-orange-glow flex items-center justify-center gap-2 shrink-0">
+                                                <Upload className="w-4 h-4" />
+                                                <span>رفع من الحاسوب / الهاتف</span>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => handleFileUpload(e, true)}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                        </div>
                                     </div>
 
-                                    {/* Add New Gallery Image Input */}
-                                    <div>
-                                        <label className="text-[11px] font-bold text-gray-400 block mb-1">إضافة صورة فرعية للمعرض</label>
-                                        <div className="flex gap-2">
+                                    {/* 2. Additional Gallery Images Section */}
+                                    <div className="space-y-2 pt-1 border-t border-gray-850">
+                                        <label className="text-[11px] font-bold text-gray-300 block">إضافة صور فرعية لمعرض الوصفة</label>
+
+                                        {/* PC / Mobile Multi-file Dropzone button */}
+                                        <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-700 hover:border-brand-500 bg-gray-900/60 hover:bg-gray-900 rounded-2xl cursor-pointer transition-all group text-center">
+                                            <Upload className="w-6 h-6 text-brand-500 group-hover:scale-110 transition-transform mb-1" />
+                                            <span className="text-xs font-black text-white">رفع صور من جهازك (PC أو الهاتف 📱)</span>
+                                            <span className="text-[10px] text-gray-400 mt-0.5">يمكنك تحديد صورة أو عدة صور دفعة واحدة</span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={(e) => handleFileUpload(e, false)}
+                                                className="hidden"
+                                            />
+                                        </label>
+
+                                        {/* Direct URL Input fallback */}
+                                        <div className="flex gap-2 pt-1">
                                             <input
                                                 type="url"
-                                                placeholder="أدخلي رابط الصورة (URL)..."
+                                                placeholder="أو أدخل رابط صورة عبر الانترنت (URL)..."
                                                 value={newImageUrl}
                                                 onChange={e => setNewImageUrl(e.target.value)}
                                                 className="flex-1 bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
@@ -352,15 +412,15 @@ export default function AdminDashboardPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => addGalleryImage(newImageUrl)}
-                                                className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1 shrink-0"
+                                                className="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1 shrink-0 border border-gray-700"
                                             >
                                                 <Plus className="w-4 h-4" />
-                                                <span>إضافة</span>
+                                                <span>إضافة رابط</span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    {/* Thumbnails Grid Preview */}
+                                    {/* 3. Thumbnails Grid Preview */}
                                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 pt-2">
                                         {/* Main image thumbnail */}
                                         <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-brand-500 shadow-md group">

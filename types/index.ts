@@ -48,6 +48,7 @@ export interface Recipe {
     cook_time_minutes: number;
     servings: number;
     main_image: string;
+    gallery_images?: string[];
     video_url?: string;
     views_count: number;
     rating_avg: number;

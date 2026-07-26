@@ -41,6 +41,19 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
     const recipe = recipes.find(r => r.slug === slug) || recipes[1] || MOCK_RECIPES[1];
     const favorite = isFavorite(recipe.id);
 
+    // Active gallery image state
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+
+    // Build dynamic gallery from main_image + gallery_images + step images
+    const rawGallery = [
+        recipe.main_image,
+        ...(recipe.gallery_images || []),
+        ...recipe.steps.map(s => s.image_url).filter((url): url is string => Boolean(url))
+    ];
+    // Deduplicate
+    const galleryList = Array.from(new Set(rawGallery.filter(Boolean)));
+    const currentHeroImage = galleryList[selectedImageIndex] || recipe.main_image;
+
     // Ingredients checklist state
     const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
     const [activeStep, setActiveStep] = useState<number>(0);
@@ -161,9 +174,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
             <div className="space-y-4">
                 <div className="relative aspect-video sm:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl bg-gray-900 group">
                     <img
-                        src={recipe.main_image}
+                        src={currentHeroImage}
                         alt={recipe.title_ar}
-                        className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-all duration-700"
                     />
                     {recipe.video_url && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xs">
@@ -179,19 +192,23 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                     )}
                 </div>
 
-                {/* 4 Thumbnail Gallery row matching reference image */}
-                <div className="grid grid-cols-4 gap-3 max-w-2xl mx-auto">
-                    {[
-                        recipe.main_image,
-                        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&q=80',
-                        'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&q=80',
-                        'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=400&q=80',
-                    ].map((imgUrl, idx) => (
-                        <div key={idx} className="aspect-square rounded-2xl overflow-hidden border-2 border-white shadow-md hover:scale-105 transition-transform cursor-pointer">
-                            <img src={imgUrl} alt="صورة إضافية" className="w-full h-full object-cover" />
-                        </div>
-                    ))}
-                </div>
+                {/* Dynamic Gallery Row */}
+                {galleryList.length > 1 && (
+                    <div className="flex items-center justify-center gap-3 overflow-x-auto py-2 max-w-2xl mx-auto scrollbar-none">
+                        {galleryList.map((imgUrl, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setSelectedImageIndex(idx)}
+                                className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 shadow-md ${selectedImageIndex === idx ? 'border-brand-500 scale-105 ring-4 ring-brand-500/20' : 'border-white opacity-70 hover:opacity-100 hover:scale-102'}`}
+                            >
+                                <img src={imgUrl} alt={`صورة ${idx + 1}`} className="w-full h-full object-cover" />
+                                {selectedImageIndex === idx && (
+                                    <div className="absolute inset-0 bg-brand-500/10" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* 4. Metadata Badges Row matching reference design */}

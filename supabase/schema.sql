@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS public.recipes (
     cook_time_minutes INT DEFAULT 45,
     servings INT DEFAULT 4,
     main_image TEXT NOT NULL,
+    gallery_images JSONB DEFAULT '[]'::jsonb,
     video_url TEXT,
     views_count INT DEFAULT 0,
     rating_avg NUMERIC(3,2) DEFAULT 5.0,
@@ -177,9 +178,16 @@ CREATE POLICY "Public products are viewable by everyone" ON public.products FOR 
 CREATE POLICY "Public site settings are viewable by everyone" ON public.site_settings FOR SELECT USING (true);
 CREATE POLICY "Public cooking reels are viewable by everyone" ON public.cooking_reels FOR SELECT USING (true);
 
--- Authenticated User INSERT policies
-CREATE POLICY "Authenticated users can post reviews" ON public.reviews FOR INSERT WITH CHECK (true);
+-- INSERT policies (allow anonymous comment posting)
+CREATE POLICY "Anyone can post reviews" ON public.reviews FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can update reviews" ON public.reviews FOR UPDATE USING (true);
+CREATE POLICY "Anyone can delete reviews" ON public.reviews FOR DELETE USING (true);
 CREATE POLICY "Users can edit own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Anyone can insert recipes" ON public.recipes FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can update recipes" ON public.recipes FOR UPDATE USING (true);
+CREATE POLICY "Anyone can delete recipes" ON public.recipes FOR DELETE USING (true);
+CREATE POLICY "Anyone can insert ingredients" ON public.ingredients FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can insert steps" ON public.steps FOR INSERT WITH CHECK (true);
 
 -- ========================================================
 -- SEED DATA (REAL MOROCCAN RECIPES & CATEGORIES)
@@ -187,20 +195,20 @@ CREATE POLICY "Users can edit own profile" ON public.profiles FOR UPDATE USING (
 
 -- Insert Categories
 INSERT INTO public.categories (id, name_ar, name_fr, name_en, slug, image_url, recipe_count) VALUES
-('11111111-1111-1111-1111-111111111111', 'أطباق مغربية', 'Cuisine Marocaine', 'Moroccan Cuisine', 'moroccan', 'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=600&q=80', 72),
-('22222222-2222-2222-2222-222222222222', 'حلويات', 'Pâtisseries & Desserts', 'Sweets & Desserts', 'sweets', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80', 124),
-('33333333-3333-3333-3333-333333333333', 'رمضان', 'Spécial Ramadan', 'Ramadan Specials', 'ramadan', 'https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=600&q=80', 56),
-('44444444-4444-4444-4444-444444444444', 'مملحات', 'Salés & Feuilletés', 'Savory Pastries', 'savory', 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&q=80', 67)
+('11111111-1111-1111-1111-111111111111', 'أطباق مغربية', 'Cuisine Marocaine', 'Moroccan Cuisine', 'moroccan', 'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=600&q=80', 0),
+('22222222-2222-2222-2222-222222222222', 'حلويات', 'Pâtisseries & Desserts', 'Sweets & Desserts', 'sweets', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80', 0),
+('33333333-3333-3333-3333-333333333333', 'رمضان', 'Spécial Ramadan', 'Ramadan Specials', 'ramadan', 'https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=600&q=80', 0),
+('44444444-4444-4444-4444-444444444444', 'مملحات', 'Salés & Feuilletés', 'Savory Pastries', 'savory', 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&q=80', 0)
 ON CONFLICT (slug) DO NOTHING;
 
 -- Insert Real Recipe 1: Chocolate Cake
 INSERT INTO public.recipes (id, title_ar, title_fr, title_en, slug, description_ar, category_id, category_name_ar, difficulty, prep_time_minutes, cook_time_minutes, servings, main_image, views_count, rating_avg, rating_count, featured, published) VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'كعكة الشوكولاتة بالكريمة', 'Gâteau Fondant au Chocolat', 'Creamy Chocolate Fudge Cake', 'chocolate-cream-cake', 'كعكة شوكولاتة غنية وهشة مع طبقة فاخرة من الكريمة والغاناش المخملي. وصفة مثالية للمناسبات والعزومات.', '22222222-2222-2222-2222-222222222222', 'حلويات', 'easy', 20, 45, 8, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80', 18420, 4.90, 2140, true, true)
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'كعكة الشوكولاتة بالكريمة', 'Gâteau Fondant au Chocolat', 'Creamy Chocolate Fudge Cake', 'chocolate-cream-cake', 'كعكة شوكولاتة غنية وهشة مع طبقة فاخرة من الكريمة والغاناش المخملي. وصفة مثالية للمناسبات والعزومات.', '22222222-2222-2222-2222-222222222222', 'حلويات', 'easy', 20, 45, 8, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80', 0, 0.00, 0, true, true)
 ON CONFLICT (slug) DO NOTHING;
 
 -- Insert Real Recipe 2: Chicken Tagine
 INSERT INTO public.recipes (id, title_ar, title_fr, title_en, slug, description_ar, category_id, category_name_ar, difficulty, prep_time_minutes, cook_time_minutes, servings, main_image, views_count, rating_avg, rating_count, featured, published) VALUES
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'طاجين الدجاج بالزيتون والليمون المصير', 'Poulet aux Olives et Citron Confit', 'Moroccan Chicken Tagine with Olives & Preserved Lemon', 'chicken-tagine-olives', 'طبق مغربي أصيل وفاخر بنكهة متوازنة بين الدجاج الطري المحمر والزيتون الأخضر والليمون المخلل المصير.', '11111111-1111-1111-1111-111111111111', 'أطباق مغربية', 'medium', 30, 60, 6, 'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=80', 24150, 4.90, 1876, true, true)
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'طاجين الدجاج بالزيتون والليمون المصير', 'Poulet aux Olives et Citron Confit', 'Moroccan Chicken Tagine with Olives & Preserved Lemon', 'chicken-tagine-olives', 'طبق مغربي أصيل وفاخر بنكهة متوازنة بين الدجاج الطري المحمر والزيتون الأخضر والليمون المخلل المصير.', '11111111-1111-1111-1111-111111111111', 'أطباق مغربية', 'medium', 30, 60, 6, 'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=80', 0, 0.00, 0, true, true)
 ON CONFLICT (slug) DO NOTHING;
 
 -- Insert Ingredients for Chocolate Cake

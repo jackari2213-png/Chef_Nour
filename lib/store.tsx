@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Recipe, Review, Order, UserProfile, Language, Product } from '@/types';
 import { MOCK_RECIPES, MOCK_REVIEWS, MOCK_PRODUCTS, MOCK_USER_PROFILE } from './mock-data';
+import { supabase, isSupabaseConfigured } from './supabase-client';
 
 interface AppContextType {
     language: Language;
@@ -37,54 +38,96 @@ interface AppContextType {
     // Search & Filter State
     searchQuery: string;
     setSearchQuery: (query: string) => void;
+
+    // Loading state
+    isLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
     const [language, setLanguage] = useState<Language>('ar');
-    const [favorites, setFavorites] = useState<string[]>(['rec-1', 'rec-2']);
+    const [favorites, setFavorites] = useState<string[]>([]);
     const [user, setUser] = useState<UserProfile | null>(MOCK_USER_PROFILE);
     const [recipes, setRecipes] = useState<Recipe[]>(MOCK_RECIPES);
     const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
-    const [orders, setOrders] = useState<Order[]>([
-        {
-            id: 'ord-1001',
-            user_id: 'usr-admin',
-            customer_name: 'الشيف نور',
-            customer_email: 'chefnour@example.com',
-            total_amount_mad: 49,
-            payment_status: 'paid',
-            payment_ref: 'PAY-89234710',
-            product_id: 'prod-1',
-            product_title_ar: 'كتاب حلويات العيد - الشيف نور',
-            product_cover_image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80',
-            created_at: new Date().toISOString(),
-        }
-    ]);
+    const [orders, setOrders] = useState<Order[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Initial Load from localStorage
+    // ─── Fetch real data from Supabase on mount ───────────────────────────────
+    const fetchFromSupabase = useCallback(async () => {
+        if (!isSupabaseConfigured()) {
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            // Fetch recipes with ingredients and steps
+            const { data: recipesData, error: recipesError } = await supabase
+                .from('recipes')
+                .select('*')
+                .eq('published', true)
+                .order('created_at', { ascending: false });
+
+            if (recipesData && !recipesError) {
+                // For each recipe, fetch its ingredients and steps
+                const fullRecipes: Recipe[] = await Promise.all(
+                    recipesData.map(async (r: any) => {
+                        const { data: ingredients } = await supabase
+                            .from('ingredients')
+                            .select('*')
+                            .eq('recipe_id', r.id)
+                            .order('order_index', { ascending: true });
+
+                        const { data: steps } = await supabase
+                            .from('steps')
+                            .select('*')
+                            .eq('recipe_id', r.id)
+                            .order('step_number', { ascending: true });
+
+                        return {
+                            ...r,
+                            gallery_images: r.gallery_images || [],
+                            ingredients: ingredients || [],
+                            steps: steps || [],
+                        };
+                    })
+                );
+                setRecipes(fullRecipes);
+            }
+
+            // Fetch reviews
+            const { data: reviewsData, error: reviewsError } = await supabase
+                .from('reviews')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (reviewsData && !reviewsError) {
+                setReviews(reviewsData);
+            }
+        } catch (err) {
+            console.error('Error fetching from Supabase:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
+        // Load favorites from localStorage
         try {
             const favs = localStorage.getItem('chef_nour_favs');
             if (favs) setFavorites(JSON.parse(favs));
-
-            const recs = localStorage.getItem('chef_nour_recipes');
-            if (recs) setRecipes(JSON.parse(recs));
-
-            const revs = localStorage.getItem('chef_nour_reviews');
-            if (revs) setReviews(JSON.parse(revs));
-
-            const ords = localStorage.getItem('chef_nour_orders');
-            if (ords) setOrders(JSON.parse(ords));
 
             const usr = localStorage.getItem('chef_nour_user');
             if (usr) setUser(JSON.parse(usr));
         } catch (e) {
             console.error('Error loading state from localStorage:', e);
         }
-    }, []);
+
+        // Fetch real data from Supabase
+        fetchFromSupabase();
+    }, [fetchFromSupabase]);
 
     // Save changes helper
     const saveToStorage = (key: string, data: any) => {
@@ -113,7 +156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             full_name: role === 'admin' ? 'الشيف نور' : email.split('@')[0],
             email: email,
             avatar_url: role === 'admin'
-                ? 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150&q=80'
+                ? '/chef-nour.jpg'
                 : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
             role: role,
             created_at: new Date().toISOString(),
@@ -127,56 +170,148 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('chef_nour_user');
     };
 
-    const addRecipe = (newRec: Omit<Recipe, 'id' | 'created_at' | 'rating_avg' | 'rating_count' | 'views_count'>) => {
+    // ─── Recipes CRUD (with Supabase sync) ────────────────────────────────────
+
+    const addRecipe = async (newRec: Omit<Recipe, 'id' | 'created_at' | 'rating_avg' | 'rating_count' | 'views_count'>) => {
+        const localId = 'rec-' + Date.now();
         const fullRec: Recipe = {
             ...newRec,
-            id: 'rec-' + Date.now(),
-            views_count: 120,
-            rating_avg: 5.0,
-            rating_count: 1,
+            id: localId,
+            views_count: 0,
+            rating_avg: 0,
+            rating_count: 0,
             created_at: new Date().toISOString(),
         };
-        setRecipes(prev => {
-            const next = [fullRec, ...prev];
-            saveToStorage('chef_nour_recipes', next);
-            return next;
-        });
+
+        // Optimistic update
+        setRecipes(prev => [fullRec, ...prev]);
+
+        // Sync to Supabase
+        if (isSupabaseConfigured()) {
+            try {
+                const { data, error } = await supabase
+                    .from('recipes')
+                    .insert({
+                        title_ar: newRec.title_ar,
+                        title_fr: newRec.title_fr,
+                        title_en: newRec.title_en,
+                        slug: newRec.slug,
+                        description_ar: newRec.description_ar,
+                        category_id: newRec.category_id,
+                        category_name_ar: newRec.category_name_ar,
+                        difficulty: newRec.difficulty,
+                        prep_time_minutes: newRec.prep_time_minutes,
+                        cook_time_minutes: newRec.cook_time_minutes,
+                        servings: newRec.servings,
+                        main_image: newRec.main_image,
+                        gallery_images: newRec.gallery_images || [],
+                        video_url: newRec.video_url,
+                        featured: newRec.featured,
+                        published: newRec.published ?? true,
+                    })
+                    .select()
+                    .single();
+
+                if (data && !error) {
+                    // Insert ingredients
+                    if (newRec.ingredients?.length) {
+                        await supabase.from('ingredients').insert(
+                            newRec.ingredients.map((ing, idx) => ({
+                                recipe_id: data.id,
+                                item_ar: ing.item_ar,
+                                amount: ing.amount,
+                                order_index: idx + 1,
+                            }))
+                        );
+                    }
+                    // Insert steps
+                    if (newRec.steps?.length) {
+                        await supabase.from('steps').insert(
+                            newRec.steps.map((step, idx) => ({
+                                recipe_id: data.id,
+                                step_number: idx + 1,
+                                instruction_ar: step.instruction_ar,
+                                image_url: step.image_url,
+                            }))
+                        );
+                    }
+
+                    // Replace local temp ID with Supabase real ID
+                    setRecipes(prev =>
+                        prev.map(r => r.id === localId ? { ...fullRec, id: data.id } : r)
+                    );
+                }
+            } catch (err) {
+                console.error('Error saving recipe to Supabase:', err);
+            }
+        }
     };
 
     const updateRecipe = (id: string, updated: Partial<Recipe>) => {
-        setRecipes(prev => {
-            const next = prev.map(r => r.id === id ? { ...r, ...updated } : r);
-            saveToStorage('chef_nour_recipes', next);
-            return next;
-        });
+        setRecipes(prev => prev.map(r => r.id === id ? { ...r, ...updated } : r));
+
+        if (isSupabaseConfigured()) {
+            supabase.from('recipes').update(updated).eq('id', id).then();
+        }
     };
 
     const deleteRecipe = (id: string) => {
-        setRecipes(prev => {
-            const next = prev.filter(r => r.id !== id);
-            saveToStorage('chef_nour_recipes', next);
-            return next;
-        });
+        setRecipes(prev => prev.filter(r => r.id !== id));
+
+        if (isSupabaseConfigured()) {
+            supabase.from('recipes').delete().eq('id', id).then();
+        }
     };
 
-    const addReview = (newRev: Omit<Review, 'id' | 'created_at' | 'moderation_status'>) => {
+    // ─── Reviews CRUD (with Supabase sync) ────────────────────────────────────
+
+    const addReview = async (newRev: Omit<Review, 'id' | 'created_at' | 'moderation_status'>) => {
+        const localId = 'rev-' + Date.now();
         const fullRev: Review = {
             ...newRev,
-            id: 'rev-' + Date.now(),
+            id: localId,
             moderation_status: 'pending',
             created_at: new Date().toISOString(),
         };
-        setReviews(prev => {
-            const next = [fullRev, ...prev];
-            saveToStorage('chef_nour_reviews', next);
-            return next;
-        });
+
+        // Optimistic UI update
+        setReviews(prev => [fullRev, ...prev]);
+
+        // Sync to Supabase
+        if (isSupabaseConfigured()) {
+            try {
+                const { data, error } = await supabase
+                    .from('reviews')
+                    .insert({
+                        user_name: newRev.user_name,
+                        user_avatar: newRev.user_avatar,
+                        is_admin: newRev.is_admin || false,
+                        parent_id: newRev.parent_id || null,
+                        recipe_id: newRev.recipe_id,
+                        recipe_title_ar: newRev.recipe_title_ar,
+                        rating: newRev.rating,
+                        comment: newRev.comment,
+                        moderation_status: 'approved',
+                    })
+                    .select()
+                    .single();
+
+                if (data && !error) {
+                    setReviews(prev =>
+                        prev.map(r => r.id === localId ? { ...fullRev, id: data.id, moderation_status: 'approved' } : r)
+                    );
+                }
+            } catch (err) {
+                console.error('Error saving review to Supabase:', err);
+            }
+        }
     };
 
-    const addReply = (parentId: string, comment: string, isAdmin: boolean) => {
+    const addReply = async (parentId: string, comment: string, isAdmin: boolean) => {
         const parent = reviews.find(r => r.id === parentId);
+        const localId = 'rev-' + Date.now();
         const reply: Review = {
-            id: 'rev-' + Date.now(),
+            id: localId,
             parent_id: parentId,
             user_id: isAdmin ? 'usr-admin' : (user?.id || 'usr-guest'),
             user_name: isAdmin ? 'الشيف نور' : (user?.full_name || 'زائر'),
@@ -189,35 +324,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             moderation_status: 'approved',
             created_at: new Date().toISOString(),
         };
-        setReviews(prev => {
-            const next = [...prev, reply];
-            saveToStorage('chef_nour_reviews', next);
-            return next;
-        });
+
+        // Optimistic update
+        setReviews(prev => [...prev, reply]);
+
+        // Sync to Supabase
+        if (isSupabaseConfigured()) {
+            try {
+                const { data, error } = await supabase
+                    .from('reviews')
+                    .insert({
+                        user_name: reply.user_name,
+                        user_avatar: reply.user_avatar,
+                        is_admin: isAdmin,
+                        parent_id: parentId,
+                        recipe_id: reply.recipe_id,
+                        recipe_title_ar: reply.recipe_title_ar,
+                        comment,
+                        moderation_status: 'approved',
+                    })
+                    .select()
+                    .single();
+
+                if (data && !error) {
+                    setReviews(prev =>
+                        prev.map(r => r.id === localId ? { ...reply, id: data.id } : r)
+                    );
+                }
+            } catch (err) {
+                console.error('Error saving reply to Supabase:', err);
+            }
+        }
     };
 
     const approveReview = (id: string) => {
-        setReviews(prev => {
-            const next = prev.map(r => r.id === id ? { ...r, moderation_status: 'approved' as const } : r);
-            saveToStorage('chef_nour_reviews', next);
-            return next;
-        });
+        setReviews(prev => prev.map(r => r.id === id ? { ...r, moderation_status: 'approved' as const } : r));
+        if (isSupabaseConfigured()) {
+            supabase.from('reviews').update({ moderation_status: 'approved' }).eq('id', id).then();
+        }
     };
 
     const rejectReview = (id: string) => {
-        setReviews(prev => {
-            const next = prev.map(r => r.id === id ? { ...r, moderation_status: 'rejected' as const } : r);
-            saveToStorage('chef_nour_reviews', next);
-            return next;
-        });
+        setReviews(prev => prev.map(r => r.id === id ? { ...r, moderation_status: 'rejected' as const } : r));
+        if (isSupabaseConfigured()) {
+            supabase.from('reviews').update({ moderation_status: 'rejected' }).eq('id', id).then();
+        }
     };
 
     const deleteReview = (id: string) => {
-        setReviews(prev => {
-            const next = prev.filter(r => r.id !== id);
-            saveToStorage('chef_nour_reviews', next);
-            return next;
-        });
+        setReviews(prev => prev.filter(r => r.id !== id));
+        if (isSupabaseConfigured()) {
+            supabase.from('reviews').delete().eq('id', id).then();
+        }
     };
 
     const createOrder = (product: Product, email: string, name: string): Order => {
@@ -234,11 +392,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             product_cover_image: product.cover_image,
             created_at: new Date().toISOString(),
         };
-        setOrders(prev => {
-            const next = [newOrder, ...prev];
-            saveToStorage('chef_nour_orders', next);
-            return next;
-        });
+        setOrders(prev => [newOrder, ...prev]);
         return newOrder;
     };
 
@@ -267,6 +421,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 createOrder,
                 searchQuery,
                 setSearchQuery,
+                isLoading,
             }}
         >
             {children}

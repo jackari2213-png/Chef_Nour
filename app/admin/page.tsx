@@ -18,14 +18,16 @@ import {
     ArrowDown,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { MOCK_ADMIN_STATS, MOCK_CATEGORIES } from '@/lib/mock-data';
+import { MOCK_CATEGORIES } from '@/lib/mock-data';
 
 interface IngredientRow { id: string; item_ar: string; amount: string; }
 interface StepRow { id: string; step_number: number; instruction_ar: string; image_url?: string; }
 
 export default function AdminDashboardPage() {
-    const { reviews, approveReview, rejectReview, recipes, addRecipe } = useApp();
+    const { reviews, approveReview, rejectReview, recipes, addRecipe, orders } = useApp();
     const pendingReviews = reviews.filter(r => r.moderation_status === 'pending');
+    const totalViews = recipes.reduce((sum, r) => sum + (r.views_count || 0), 0);
+    const totalViewsFormatted = totalViews >= 1000000 ? (totalViews / 1000000).toFixed(1) + 'M' : totalViews >= 1000 ? (totalViews / 1000).toFixed(1) + 'K' : totalViews.toString();
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
@@ -40,6 +42,13 @@ export default function AdminDashboardPage() {
     const [servings, setServings] = useState(4);
     const [description, setDescription] = useState('');
     const [mainImage, setMainImage] = useState('https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=80');
+    const [galleryImages, setGalleryImages] = useState<string[]>([
+        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&q=80',
+        'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&q=80',
+        'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80',
+    ]);
+    const [newImageUrl, setNewImageUrl] = useState('');
+
     const [ingredients, setIngredients] = useState<IngredientRow[]>([
         { id: 'i1', item_ar: 'المكون الأول', amount: '250g' },
         { id: 'i2', item_ar: 'البهارات', amount: '1 ملعقة صغيرة' },
@@ -47,6 +56,17 @@ export default function AdminDashboardPage() {
     const [steps, setSteps] = useState<StepRow[]>([
         { id: 's1', step_number: 1, instruction_ar: '' },
     ]);
+
+    // Gallery Image Helpers
+    const addGalleryImage = (url: string) => {
+        if (!url.trim()) return;
+        setGalleryImages(prev => [...prev, url.trim()]);
+        setNewImageUrl('');
+    };
+
+    const removeGalleryImage = (index: number) => {
+        setGalleryImages(prev => prev.filter((_, idx) => idx !== index));
+    };
 
     // Ingredient helpers
     const addIngredient = () => setIngredients(prev => [...prev, { id: 'i' + Date.now(), item_ar: '', amount: '' }]);
@@ -65,6 +85,8 @@ export default function AdminDashboardPage() {
         setIngredients([{ id: 'i1', item_ar: '', amount: '' }]);
         setSteps([{ id: 's1', step_number: 1, instruction_ar: '' }]);
         setMainImage('https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=80');
+        setGalleryImages([]);
+        setNewImageUrl('');
         setPrepTime(20); setCookTime(40); setServings(4);
     };
 
@@ -87,6 +109,7 @@ export default function AdminDashboardPage() {
             cook_time_minutes: Number(cookTime),
             servings: Number(servings),
             main_image: mainImage,
+            gallery_images: galleryImages,
             published: true,
             ingredients: ingredients.filter(i => i.item_ar.trim()),
             steps: steps.filter(s => s.instruction_ar.trim()),
@@ -129,7 +152,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="flex items-baseline justify-between">
                         <span className="text-3xl font-black text-white">{recipes.length}</span>
-                        <span className="text-xs font-bold text-emerald-400">+{MOCK_ADMIN_STATS.total_recipes_change}</span>
+                        <span className="text-xs font-bold text-emerald-400">حقيقي</span>
                     </div>
                 </div>
                 <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-blue-500/50 transition-all">
@@ -138,8 +161,8 @@ export default function AdminDashboardPage() {
                         <BookOpen className="w-5 h-5 text-blue-500" />
                     </div>
                     <div className="flex items-baseline justify-between">
-                        <span className="text-3xl font-black text-white">{MOCK_ADMIN_STATS.book_sales}</span>
-                        <span className="text-xs font-bold text-emerald-400">+12%</span>
+                        <span className="text-3xl font-black text-white">{orders.length}</span>
+                        <span className="text-xs font-bold text-emerald-400">حقيقي</span>
                     </div>
                 </div>
                 <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-amber-500/50 transition-all">
@@ -158,8 +181,8 @@ export default function AdminDashboardPage() {
                         <Eye className="w-5 h-5 text-purple-500" />
                     </div>
                     <div className="flex items-baseline justify-between">
-                        <span className="text-3xl font-black text-white">{MOCK_ADMIN_STATS.total_views}</span>
-                        <span className="text-xs font-bold text-emerald-400">+8%</span>
+                        <span className="text-3xl font-black text-white">{totalViewsFormatted}</span>
+                        <span className="text-xs font-bold text-emerald-400">حقيقي</span>
                     </div>
                 </div>
             </div>
@@ -298,13 +321,79 @@ export default function AdminDashboardPage() {
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none" />
                                 </div>
 
-                                <div className="sm:col-span-2">
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">رابط الصورة الرئيسية</label>
-                                    <input type="url" value={mainImage} onChange={e => setMainImage(e.target.value)}
-                                        className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none" />
-                                    {mainImage && (
-                                        <img src={mainImage} alt="preview" className="w-24 h-16 object-cover rounded-xl mt-2 border border-gray-700" onError={e => (e.currentTarget.src = '')} />
-                                    )}
+                                {/* Multi-Image & Gallery Management Section */}
+                                <div className="sm:col-span-2 space-y-3 bg-gray-950 p-4 rounded-2xl border border-gray-800">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-xs font-black text-white flex items-center gap-1.5">
+                                            <ImageIcon className="w-4 h-4 text-brand-500" />
+                                            معرض صور الوصفة (الصورة الرئيسية + الصور الإضافية)
+                                        </label>
+                                        <span className="text-[10px] text-gray-400">إجمالي {1 + galleryImages.length} صور</span>
+                                    </div>
+
+                                    {/* Input Main Image */}
+                                    <div>
+                                        <label className="text-[11px] font-bold text-gray-400 block mb-1">رابط الصورة الرئيسية (Cover)</label>
+                                        <input type="url" value={mainImage} onChange={e => setMainImage(e.target.value)}
+                                            className="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-500" />
+                                    </div>
+
+                                    {/* Add New Gallery Image Input */}
+                                    <div>
+                                        <label className="text-[11px] font-bold text-gray-400 block mb-1">إضافة صورة فرعية للمعرض</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="url"
+                                                placeholder="أدخلي رابط الصورة (URL)..."
+                                                value={newImageUrl}
+                                                onChange={e => setNewImageUrl(e.target.value)}
+                                                className="flex-1 bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => addGalleryImage(newImageUrl)}
+                                                className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1 shrink-0"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                                <span>إضافة</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Thumbnails Grid Preview */}
+                                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 pt-2">
+                                        {/* Main image thumbnail */}
+                                        <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-brand-500 shadow-md group">
+                                            <img src={mainImage} alt="main" className="w-full h-full object-cover" />
+                                            <span className="absolute bottom-0 inset-x-0 bg-brand-500 text-white text-[9px] font-black text-center py-0.5">الرئيسية</span>
+                                        </div>
+
+                                        {/* Gallery thumbnails */}
+                                        {galleryImages.map((img, idx) => (
+                                            <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-gray-700 shadow-md group">
+                                                <img src={img} alt={`gallery-${idx}`} className="w-full h-full object-cover" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeGalleryImage(idx)}
+                                                    className="absolute top-1 right-1 bg-red-600/90 hover:bg-red-600 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    title="حذف الصورة"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const oldMain = mainImage;
+                                                        setMainImage(img);
+                                                        setGalleryImages(prev => prev.map((item, i) => i === idx ? oldMain : item));
+                                                    }}
+                                                    className="absolute bottom-0 inset-x-0 bg-black/70 hover:bg-brand-600 text-white text-[8px] font-bold text-center py-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    جعلها رئيسية
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="sm:col-span-2">

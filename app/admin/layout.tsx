@@ -18,6 +18,10 @@ import {
     ShieldCheck,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
+
+// Admin email — only this email is granted admin access
+const ADMIN_EMAIL = 'nour@chefnour.com';
 
 // ─── Admin Login Gate ─────────────────────────────────────────────────────────
 function AdminLoginGate() {
@@ -28,21 +32,39 @@ function AdminLoginGate() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const ADMIN_EMAIL = 'nour@chefnour.com';
-    const ADMIN_PASSWORD = 'chefnour2024';
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
-        await new Promise(r => setTimeout(r, 600));
+        try {
+            if (isSupabaseConfigured()) {
+                // ── Supabase Auth ──────────────────────────────────────
+                const { data, error: authError } = await supabase.auth.signInWithPassword({
+                    email: email.trim().toLowerCase(),
+                    password,
+                });
 
-        if (email.trim().toLowerCase() === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-            login(email.trim().toLowerCase(), 'admin');
-        } else {
-            setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+                if (authError || !data.user) {
+                    setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+                } else if (data.user.email !== ADMIN_EMAIL) {
+                    await supabase.auth.signOut();
+                    setError('هذا الحساب لا يمتلك صلاحيات الأدمين');
+                } else {
+                    login(email.trim().toLowerCase(), 'admin');
+                }
+            } else {
+                // ── Fallback (dev without Supabase) ────────────────────
+                if (email.trim().toLowerCase() === ADMIN_EMAIL && password === 'chefnour2024') {
+                    login(email.trim().toLowerCase(), 'admin');
+                } else {
+                    setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+                }
+            }
+        } catch (err) {
+            setError('حدث خطأ في الاتصال، حاول مرة أخرى');
         }
+
         setLoading(false);
     };
 

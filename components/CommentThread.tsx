@@ -353,7 +353,7 @@ export default function CommentThread({
     limit,
 }: CommentThreadProps) {
     const { reviews } = useApp();
-    const [visibleCount, setVisibleCount] = useState(5);
+    const [visibleCount, setVisibleCount] = useState(2);
 
     // Build tree: flatten list → nested structure
     const tree = useMemo(() => {
@@ -394,7 +394,7 @@ export default function CommentThread({
                     {hasMore && (
                         <div className="text-center pt-2">
                             <button
-                                onClick={() => setVisibleCount(prev => prev + 5)}
+                                onClick={() => setVisibleCount(prev => prev + 3)}
                                 className="bg-brand-50 hover:bg-brand-100 text-brand-600 font-extrabold text-xs px-6 py-2.5 rounded-2xl border border-brand-200 transition-all shadow-xs flex items-center gap-2 mx-auto"
                             >
                                 <span>عرض باقي التعليقات ({tree.length - visibleCount} تعليق متبقي)</span>

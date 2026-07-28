@@ -57,7 +57,13 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
                 <div className="absolute top-3 left-3 z-10">
                     <span className="flex items-center gap-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20">
                         <Flame className="w-3.5 h-3.5 text-orange-400 fill-current" />
-                        <span>{(recipe.views_count / 1000).toFixed(0)}K</span>
+                        <span>{
+                            recipe.views_count >= 1000000
+                                ? (recipe.views_count / 1000000).toFixed(1) + 'M'
+                                : recipe.views_count >= 1000
+                                    ? (recipe.views_count / 1000).toFixed(1) + 'K'
+                                    : recipe.views_count.toString()
+                        }</span>
                     </span>
                 </div>
 

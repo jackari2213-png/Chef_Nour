@@ -25,7 +25,7 @@ interface IngredientRow { id: string; item_ar: string; amount: string; }
 interface StepRow { id: string; step_number: number; instruction_ar: string; image_url?: string; }
 
 export default function AdminDashboardPage() {
-    const { reviews, approveReview, rejectReview, recipes, addRecipe, orders } = useApp();
+    const { reviews, approveReview, rejectReview, recipes, addRecipe, orders, categories } = useApp();
     const pendingReviews = reviews.filter(r => r.moderation_status === 'pending');
     const totalViews = recipes.reduce((sum, r) => sum + (r.views_count || 0), 0);
     const totalViewsFormatted = totalViews >= 1000000 ? (totalViews / 1000000).toFixed(1) + 'M' : totalViews >= 1000 ? (totalViews / 1000).toFixed(1) + 'K' : totalViews.toString();
@@ -36,18 +36,14 @@ export default function AdminDashboardPage() {
 
     // Form fields
     const [title, setTitle] = useState('');
-    const [category, setCategory] = useState(MOCK_CATEGORIES[0].id);
+    const [category, setCategory] = useState(categories[0]?.id || 'cat-1');
     const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
     const [prepTime, setPrepTime] = useState(20);
     const [cookTime, setCookTime] = useState(40);
     const [servings, setServings] = useState(4);
     const [description, setDescription] = useState('');
-    const [mainImage, setMainImage] = useState('https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=80');
-    const [galleryImages, setGalleryImages] = useState<string[]>([
-        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&q=80',
-        'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&q=80',
-        'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80',
-    ]);
+    const [mainImage, setMainImage] = useState('');
+    const [galleryImages, setGalleryImages] = useState<string[]>([]);
     const [newImageUrl, setNewImageUrl] = useState('');
 
     const [ingredients, setIngredients] = useState<IngredientRow[]>([
@@ -109,7 +105,7 @@ export default function AdminDashboardPage() {
         setTitle(''); setDescription('');
         setIngredients([{ id: 'i1', item_ar: '', amount: '' }]);
         setSteps([{ id: 's1', step_number: 1, instruction_ar: '' }]);
-        setMainImage('https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=80');
+        setMainImage('');
         setGalleryImages([]);
         setNewImageUrl('');
         setPrepTime(20); setCookTime(40); setServings(4);
@@ -123,17 +119,19 @@ export default function AdminDashboardPage() {
             return;
         }
 
+        const selectedCat = categories.find(c => c.id === category) || categories[0];
+
         addRecipe({
             title_ar: title,
             slug: 'recipe-' + Date.now(),
             description_ar: description,
-            category_id: category,
-            category_name_ar: MOCK_CATEGORIES.find(c => c.id === category)?.name_ar || 'أطباق مغربية',
+            category_id: selectedCat?.id || category,
+            category_name_ar: selectedCat?.name_ar || 'أطباق مغربية',
             difficulty,
             prep_time_minutes: Number(prepTime),
             cook_time_minutes: Number(cookTime),
             servings: Number(servings),
-            main_image: mainImage,
+            main_image: mainImage || 'https://images.unsplash.com/photo-1541518763669-27fef04b14da?w=800&q=80',
             gallery_images: galleryImages,
             published: true,
             ingredients: ingredients.filter(i => i.item_ar.trim()),
@@ -320,7 +318,7 @@ export default function AdminDashboardPage() {
                                     <label className="text-xs font-bold text-gray-400 block mb-1.5">الفئة</label>
                                     <select value={category} onChange={e => setCategory(e.target.value)}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none">
-                                        {MOCK_CATEGORIES.map(c => (<option key={c.id} value={c.id}>{c.name_ar}</option>))}
+                                        {categories.map(c => (<option key={c.id} value={c.id}>{c.name_ar}</option>))}
                                     </select>
                                 </div>
 
@@ -354,7 +352,7 @@ export default function AdminDashboardPage() {
                                             معرض صور الوصفة (الصورة الرئيسية + الصور الإضافية)
                                         </label>
                                         <span className="text-[10px] bg-brand-950 text-brand-400 font-extrabold px-2.5 py-1 rounded-full border border-brand-800">
-                                            إجمالي {1 + galleryImages.length} صور
+                                            إجمالي {(mainImage ? 1 : 0) + galleryImages.length} صور
                                         </span>
                                     </div>
 
@@ -423,10 +421,17 @@ export default function AdminDashboardPage() {
                                     {/* 3. Thumbnails Grid Preview */}
                                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 pt-2">
                                         {/* Main image thumbnail */}
-                                        <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-brand-500 shadow-md group">
-                                            <img src={mainImage} alt="main" className="w-full h-full object-cover" />
-                                            <span className="absolute bottom-0 inset-x-0 bg-brand-500 text-white text-[9px] font-black text-center py-0.5">الرئيسية</span>
-                                        </div>
+                                        {mainImage ? (
+                                            <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-brand-500 shadow-md group">
+                                                <img src={mainImage} alt="main" className="w-full h-full object-cover" />
+                                                <span className="absolute bottom-0 inset-x-0 bg-brand-500 text-white text-[9px] font-black text-center py-0.5">الرئيسية</span>
+                                            </div>
+                                        ) : (
+                                            <div className="relative aspect-square rounded-xl overflow-hidden border border-dashed border-gray-700 bg-gray-900/50 flex flex-col items-center justify-center text-center p-1 text-gray-500">
+                                                <ImageIcon className="w-5 h-5 mb-1 text-gray-600" />
+                                                <span className="text-[9px] font-bold">بدون رئيسية</span>
+                                            </div>
+                                        )}
 
                                         {/* Gallery thumbnails */}
                                         {galleryImages.map((img, idx) => (

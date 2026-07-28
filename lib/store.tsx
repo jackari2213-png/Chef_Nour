@@ -270,11 +270,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const updateRecipe = (id: string, updated: Partial<Recipe>) => {
+    const updateRecipe = async (id: string, updated: Partial<Recipe>) => {
         setRecipes(prev => prev.map(r => r.id === id ? { ...r, ...updated } : r));
 
         if (isSupabaseConfigured()) {
-            supabase.from('recipes').update(updated).eq('id', id).then();
+            try {
+                const { ingredients: newIngredients, steps: newSteps, ...recipeFields } = updated;
+
+                if (Object.keys(recipeFields).length > 0) {
+                    await supabase.from('recipes').update(recipeFields).eq('id', id);
+                }
+
+                if (newIngredients && newIngredients.length > 0) {
+                    await supabase.from('ingredients').delete().eq('recipe_id', id);
+                    await supabase.from('ingredients').insert(
+                        newIngredients.map((ing, idx) => ({
+                            recipe_id: id,
+                            item_ar: ing.item_ar,
+                            amount: ing.amount,
+                            order_index: idx + 1,
+                        }))
+                    );
+                }
+
+                if (newSteps && newSteps.length > 0) {
+                    await supabase.from('steps').delete().eq('recipe_id', id);
+                    await supabase.from('steps').insert(
+                        newSteps.map((step, idx) => ({
+                            recipe_id: id,
+                            step_number: idx + 1,
+                            instruction_ar: step.instruction_ar,
+                            image_url: step.image_url,
+                        }))
+                    );
+                }
+            } catch (err) {
+                console.error('Error updating recipe in Supabase:', err);
+            }
         }
     };
 

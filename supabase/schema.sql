@@ -166,6 +166,40 @@ ALTER TABLE public.newsletter_subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can subscribe to newsletter" ON public.newsletter_subscriptions FOR INSERT WITH CHECK (true);
 
 -- ========================================================
+-- HELPER FUNCTIONS (RPCs called from the app)
+-- ========================================================
+
+-- Increment recipe views_count by 1
+CREATE OR REPLACE FUNCTION public.increment_views(recipe_id UUID)
+RETURNS void AS $$
+BEGIN
+    UPDATE public.recipes
+    SET views_count = views_count + 1
+    WHERE id = recipe_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Increment category recipe_count by 1
+CREATE OR REPLACE FUNCTION public.increment_category_count(cat_id UUID)
+RETURNS void AS $$
+BEGIN
+    UPDATE public.categories
+    SET recipe_count = recipe_count + 1
+    WHERE id = cat_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Decrement category recipe_count by 1 (min 0)
+CREATE OR REPLACE FUNCTION public.decrement_category_count(cat_id UUID)
+RETURNS void AS $$
+BEGIN
+    UPDATE public.categories
+    SET recipe_count = GREATEST(0, recipe_count - 1)
+    WHERE id = cat_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ========================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ========================================================
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;

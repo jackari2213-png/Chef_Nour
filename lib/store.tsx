@@ -25,6 +25,7 @@ interface AppContextType {
     addRecipe: (recipe: Omit<Recipe, 'id' | 'created_at' | 'rating_avg' | 'rating_count' | 'views_count'>) => void;
     updateRecipe: (id: string, recipe: Partial<Recipe>) => void;
     deleteRecipe: (id: string) => void;
+    incrementViews: (recipeId: string) => void;
 
     // Reviews & Moderation
     reviews: Review[];
@@ -250,6 +251,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                         );
                     }
 
+                    // Update category recipe_count
+                    if (newRec.category_id) {
+                        await supabase.rpc('increment_category_count', { cat_id: newRec.category_id }).then();
+                        setCategories(prev => prev.map(c =>
+                            c.id === newRec.category_id ? { ...c, recipe_count: c.recipe_count + 1 } : c
+                        ));
+                    }
+
                     // Replace local temp ID with Supabase real ID
                     setRecipes(prev =>
                         prev.map(r => r.id === localId ? { ...fullRec, id: data.id } : r)
@@ -270,10 +279,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     const deleteRecipe = (id: string) => {
+        const recipe = recipes.find(r => r.id === id);
         setRecipes(prev => prev.filter(r => r.id !== id));
 
         if (isSupabaseConfigured()) {
             supabase.from('recipes').delete().eq('id', id).then();
+            // Decrement category count
+            if (recipe?.category_id) {
+                supabase.rpc('decrement_category_count', { cat_id: recipe.category_id }).then();
+                setCategories(prev => prev.map(c =>
+                    c.id === recipe.category_id ? { ...c, recipe_count: Math.max(0, c.recipe_count - 1) } : c
+                ));
+            }
+        }
+    };
+
+    // Increment recipe views count
+    const incrementViews = (recipeId: string) => {
+        setRecipes(prev => prev.map(r =>
+            r.id === recipeId ? { ...r, views_count: r.views_count + 1 } : r
+        ));
+        if (isSupabaseConfigured()) {
+            supabase.rpc('increment_views', { recipe_id: recipeId }).then();
         }
     };
 
@@ -314,6 +341,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                     setReviews(prev =>
                         prev.map(r => r.id === localId ? { ...fullRev, id: data.id, moderation_status: 'approved' } : r)
                     );
+
+                    // Recalculate rating_avg and rating_count for the recipe
+                    if (newRev.recipe_id && newRev.rating && newRev.rating > 0) {
+                        const { data: allRevs } = await supabase
+                            .from('reviews')
+                            .select('rating')
+                            .eq('recipe_id', newRev.recipe_id)
+                            .not('rating', 'is', null)
+                            .gt('rating', 0);
+
+                        if (allRevs && allRevs.length > 0) {
+                            const total = allRevs.reduce((sum, r) => sum + (r.rating || 0), 0);
+                            const avg = parseFloat((total / allRevs.length).toFixed(2));
+                            const count = allRevs.length;
+
+                            await supabase
+                                .from('recipes')
+                                .update({ rating_avg: avg, rating_count: count })
+                                .eq('id', newRev.recipe_id);
+
+                            // Update local state immediately
+                            setRecipes(prev => prev.map(r =>
+                                r.id === newRev.recipe_id
+                                    ? { ...r, rating_avg: avg, rating_count: count }
+                                    : r
+                            ));
+                        }
+                    }
                 }
             } catch (err) {
                 console.error('Error saving review to Supabase:', err);
@@ -426,6 +481,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 addRecipe,
                 updateRecipe,
                 deleteRecipe,
+                incrementViews,
                 reviews,
                 addReview,
                 addReply,

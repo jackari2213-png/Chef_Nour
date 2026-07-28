@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Clock,
@@ -34,7 +34,7 @@ import CommentThread from '@/components/CommentThread';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
-    const { recipes, isFavorite, toggleFavorite, isLoading } = useApp();
+    const { recipes, isFavorite, toggleFavorite, isLoading, incrementViews } = useApp();
 
     const recipe = recipes.find(r => r.slug === slug);
 
@@ -46,6 +46,14 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
     // Fullscreen Cooking Mode state
     const [cookingModeOpen, setCookingModeOpen] = useState<boolean>(false);
     const [cookingStep, setCookingStep] = useState<number>(0);
+
+    // Increment views_count once when the recipe page is visited
+    useEffect(() => {
+        if (recipe?.id && !isLoading) {
+            incrementViews(recipe.id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [recipe?.id, isLoading]);
 
     // Wait until recipes are loaded from Supabase
     if (isLoading) {

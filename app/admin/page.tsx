@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { MOCK_CATEGORIES } from '@/lib/mock-data';
+import { compressImageFile } from '@/lib/imageUtils';
 
 interface IngredientRow { id: string; item_ar: string; amount: string; }
 interface StepRow { id: string; step_number: number; instruction_ar: string; image_url?: string; }
@@ -65,25 +66,23 @@ export default function AdminDashboardPage() {
         setGalleryImages(prev => prev.filter((_, idx) => idx !== index));
     };
 
-    // File Upload Handler for PC / Mobile
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean = false) => {
+    // File Upload Handler for PC / Mobile with Compression
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean = false) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
-        Array.from(files).forEach((file) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const result = event.target?.result as string;
-                if (result) {
-                    if (isMain) {
-                        setMainImage(result);
-                    } else {
-                        setGalleryImages(prev => [...prev, result]);
-                    }
+        for (const file of Array.from(files)) {
+            try {
+                const compressedUrl = await compressImageFile(file);
+                if (isMain) {
+                    setMainImage(compressedUrl);
+                } else {
+                    setGalleryImages(prev => [...prev, compressedUrl]);
                 }
-            };
-            reader.readAsDataURL(file);
-        });
+            } catch (err) {
+                console.error('Image compression failed:', err);
+            }
+        }
 
         // Reset input value so same file can be selected again
         e.target.value = '';

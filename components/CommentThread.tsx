@@ -353,6 +353,7 @@ export default function CommentThread({
     limit,
 }: CommentThreadProps) {
     const { reviews } = useApp();
+    const [visibleCount, setVisibleCount] = useState(5);
 
     // Build tree: flatten list → nested structure
     const tree = useMemo(() => {
@@ -379,7 +380,8 @@ export default function CommentThread({
         return topLevel.map(r => ({ ...r, replies: replyMap[r.id] || [] }));
     }, [reviews, recipeId]);
 
-    const displayed = limit ? tree.slice(0, limit) : tree;
+    const displayed = limit ? tree.slice(0, limit) : tree.slice(0, visibleCount);
+    const hasMore = !limit && tree.length > visibleCount;
 
     return (
         <div className="space-y-6">
@@ -389,6 +391,19 @@ export default function CommentThread({
                     {displayed.map(review => (
                         <CommentCard key={review.id} review={review} depth={0} />
                     ))}
+                    {hasMore && (
+                        <div className="text-center pt-2">
+                            <button
+                                onClick={() => setVisibleCount(prev => prev + 5)}
+                                className="bg-brand-50 hover:bg-brand-100 text-brand-600 font-extrabold text-xs px-6 py-2.5 rounded-2xl border border-brand-200 transition-all shadow-xs flex items-center gap-2 mx-auto"
+                            >
+                                <span>عرض باقي التعليقات ({tree.length - visibleCount} تعليق متبقي)</span>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="text-center py-10 bg-white rounded-3xl border border-gray-100 shadow-sm">

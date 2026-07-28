@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
     Utensils,
+    Grid,
     PlusCircle,
     MessageSquare,
     Camera,
@@ -26,6 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const navItems = [
         { href: '/admin', label: 'لوحة التحكم', icon: LayoutDashboard },
         { href: '/admin/recipes', label: 'إدارة الوصفات', icon: Utensils },
+        { href: '/admin/categories', label: 'إدارة الفئات والتصنيفات', icon: Grid },
         { href: '/admin/moderation', label: 'إدارة التعليقات والصور', icon: MessageSquare },
         { href: '/admin/products', label: 'المنتجات الرقمية (الكتب)', icon: BookOpen },
     ];

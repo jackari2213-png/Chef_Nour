@@ -17,8 +17,11 @@ interface AppContextType {
     login: (email: string, role?: 'user' | 'admin') => void;
     logout: () => void;
 
-    // Categories
+    // Categories Management
     categories: Category[];
+    addCategory: (category: Omit<Category, 'id' | 'recipe_count'>) => Promise<void>;
+    updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
+    deleteCategory: (id: string) => Promise<void>;
 
     // Recipes Management
     recipes: Recipe[];
@@ -183,6 +186,74 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const logout = () => {
         setUser(null);
         localStorage.removeItem('chef_nour_user');
+    };
+
+    // ─── Categories Management (with Supabase sync) ───────────────────────────
+
+    const addCategory = async (newCat: Omit<Category, 'id' | 'recipe_count'>) => {
+        const localId = 'cat-' + Date.now();
+        const fullCat: Category = {
+            ...newCat,
+            id: localId,
+            recipe_count: 0,
+        };
+
+        setCategories(prev => [...prev, fullCat]);
+
+        if (isSupabaseConfigured()) {
+            try {
+                const { data } = await supabase
+                    .from('categories')
+                    .insert({
+                        name_ar: newCat.name_ar,
+                        name_fr: newCat.name_fr || '',
+                        name_en: newCat.name_en || '',
+                        slug: newCat.slug,
+                        image_url: newCat.image_url,
+                    })
+                    .select()
+                    .single();
+
+                if (data) {
+                    setCategories(prev => prev.map(c => c.id === localId ? { ...c, id: data.id } : c));
+                }
+            } catch (err) {
+                console.error('Failed to add category to Supabase:', err);
+            }
+        }
+    };
+
+    const updateCategory = async (id: string, updatedFields: Partial<Category>) => {
+        setCategories(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+
+        if (isSupabaseConfigured()) {
+            try {
+                await supabase
+                    .from('categories')
+                    .update({
+                        ...(updatedFields.name_ar && { name_ar: updatedFields.name_ar }),
+                        ...(updatedFields.name_fr && { name_fr: updatedFields.name_fr }),
+                        ...(updatedFields.name_en && { name_en: updatedFields.name_en }),
+                        ...(updatedFields.slug && { slug: updatedFields.slug }),
+                        ...(updatedFields.image_url && { image_url: updatedFields.image_url }),
+                    })
+                    .eq('id', id);
+            } catch (err) {
+                console.error('Failed to update category in Supabase:', err);
+            }
+        }
+    };
+
+    const deleteCategory = async (id: string) => {
+        setCategories(prev => prev.filter(c => c.id !== id));
+
+        if (isSupabaseConfigured()) {
+            try {
+                await supabase.from('categories').delete().eq('id', id);
+            } catch (err) {
+                console.error('Failed to delete category from Supabase:', err);
+            }
+        }
     };
 
     // ─── Recipes CRUD (with Supabase sync) ────────────────────────────────────
@@ -509,6 +580,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 login,
                 logout,
                 categories,
+                addCategory,
+                updateCategory,
+                deleteCategory,
                 recipes,
                 addRecipe,
                 updateRecipe,

@@ -24,11 +24,20 @@ import { MOCK_CATEGORIES } from '@/lib/mock-data';
 export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
-    const { language, setLanguage, user, logout, favorites, searchQuery, setSearchQuery } = useApp();
+    const { language, setLanguage, user, logout, favorites, searchQuery, setSearchQuery, categories, recipes } = useApp();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+    // List categories (live categories or fallback)
+    const categoryList = categories.length > 0 ? categories : MOCK_CATEGORIES;
+
+    // Dynamic category count calculation
+    const getCategoryCount = (catId: string, catNameAr: string) => {
+        const count = recipes.filter(r => r.category_id === catId || r.category_name_ar === catNameAr).length;
+        return count;
+    };
 
     // If in admin dashboard view, render dark admin header variant or skip
     if (pathname.startsWith('/admin')) {
@@ -100,7 +109,7 @@ export default function Header() {
                                         <div className="px-4 py-1 text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
                                             التصنيفات
                                         </div>
-                                        {MOCK_CATEGORIES.map((cat) => (
+                                        {categoryList.map((cat) => (
                                             <Link
                                                 key={cat.id}
                                                 href={`/category/${cat.slug}`}
@@ -109,7 +118,7 @@ export default function Header() {
                                             >
                                                 <span>{cat.name_ar}</span>
                                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-semibold">
-                                                    {cat.recipe_count}
+                                                    {getCategoryCount(cat.id, cat.name_ar)}
                                                 </span>
                                             </Link>
                                         ))}
@@ -268,7 +277,7 @@ export default function Header() {
                         <div className="py-2 border-b border-gray-100">
                             <span className="text-xs font-bold text-gray-400 block mb-2">تصفح الوصفات حسب الفئة:</span>
                             <div className="grid grid-cols-2 gap-2">
-                                {MOCK_CATEGORIES.map(cat => (
+                                {categoryList.map(cat => (
                                     <Link
                                         key={cat.id}
                                         href={`/category/${cat.slug}`}
@@ -276,7 +285,9 @@ export default function Header() {
                                         className="p-2.5 rounded-xl bg-gray-50 text-xs font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-600 transition-colors flex items-center justify-between"
                                     >
                                         <span>{cat.name_ar}</span>
-                                        <span className="text-[10px] text-gray-400 bg-white px-1.5 py-0.5 rounded-full">{cat.recipe_count}</span>
+                                        <span className="text-[10px] text-gray-400 bg-white px-1.5 py-0.5 rounded-full">
+                                            {getCategoryCount(cat.id, cat.name_ar)}
+                                        </span>
                                     </Link>
                                 ))}
                             </div>

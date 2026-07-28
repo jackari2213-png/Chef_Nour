@@ -3,12 +3,11 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Filter, SlidersHorizontal, ArrowUpDown, X, Utensils } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { MOCK_CATEGORIES } from '@/lib/mock-data';
 import RecipeCard from '@/components/RecipeCard';
 import { Difficulty } from '@/types';
 
 export default function RecipesPage() {
-    const { recipes } = useApp();
+    const { recipes, categories } = useApp();
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState<string>('');
@@ -80,7 +79,7 @@ export default function RecipesPage() {
                     >
                         الكل ({recipes.length})
                     </button>
-                    {MOCK_CATEGORIES.map(cat => (
+                    {categories.map(cat => (
                         <button
                             key={cat.id}
                             onClick={() => setSelectedCategory(cat.id)}
@@ -174,7 +173,7 @@ export default function RecipesPage() {
                                 >
                                     الكل
                                 </button>
-                                {MOCK_CATEGORIES.map(cat => (
+                                {categories.map(cat => (
                                     <button
                                         key={cat.id}
                                         onClick={() => setSelectedCategory(cat.id)}

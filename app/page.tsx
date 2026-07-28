@@ -16,13 +16,12 @@ import {
     Award
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { MOCK_CATEGORIES } from '@/lib/mock-data';
 import RecipeCard from '@/components/RecipeCard';
 import CategoryCard from '@/components/CategoryCard';
 import CommentThread from '@/components/CommentThread';
 
 export default function HomePage() {
-    const { recipes } = useApp();
+    const { recipes, categories } = useApp();
     const trendingRecipes = recipes.slice(0, 6);
 
     return (
@@ -238,7 +237,7 @@ export default function HomePage() {
 
                 {/* Scrollable Horizontal Categories */}
                 <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar pt-2">
-                    {MOCK_CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                         <CategoryCard key={cat.id} category={cat} />
                     ))}
                 </div>

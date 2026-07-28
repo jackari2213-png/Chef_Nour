@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Recipe, Review, Order, UserProfile, Language, Product } from '@/types';
-import { MOCK_RECIPES, MOCK_REVIEWS, MOCK_PRODUCTS, MOCK_USER_PROFILE } from './mock-data';
+import { Recipe, Review, Order, UserProfile, Language, Product, Category } from '@/types';
+import { MOCK_RECIPES, MOCK_REVIEWS, MOCK_PRODUCTS, MOCK_USER_PROFILE, MOCK_CATEGORIES } from './mock-data';
 import { supabase, isSupabaseConfigured } from './supabase-client';
 
 interface AppContextType {
@@ -16,6 +16,9 @@ interface AppContextType {
     user: UserProfile | null;
     login: (email: string, role?: 'user' | 'admin') => void;
     logout: () => void;
+
+    // Categories
+    categories: Category[];
 
     // Recipes Management
     recipes: Recipe[];
@@ -49,6 +52,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [language, setLanguage] = useState<Language>('ar');
     const [favorites, setFavorites] = useState<string[]>([]);
     const [user, setUser] = useState<UserProfile | null>(MOCK_USER_PROFILE);
+    const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
     const [recipes, setRecipes] = useState<Recipe[]>(MOCK_RECIPES);
     const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
     const [orders, setOrders] = useState<Order[]>([]);
@@ -63,6 +67,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
 
         try {
+            // Fetch categories
+            const { data: categoriesData } = await supabase
+                .from('categories')
+                .select('*')
+                .order('name_ar', { ascending: true });
+
+            if (categoriesData && categoriesData.length > 0) {
+                setCategories(categoriesData);
+            }
+
             // Fetch recipes with ingredients and steps
             const { data: recipesData, error: recipesError } = await supabase
                 .from('recipes')
@@ -407,6 +421,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 user,
                 login,
                 logout,
+                categories,
                 recipes,
                 addRecipe,
                 updateRecipe,

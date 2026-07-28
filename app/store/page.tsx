@@ -1,16 +1,37 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, CheckCircle2 } from 'lucide-react';
+import { BookOpen, CheckCircle2, Loader2 } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
 
 export default function ComingSoonEbooks() {
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (email.trim()) {
+        if (!email.trim()) return;
+        setIsLoading(true);
+        setError('');
+
+        try {
+            if (isSupabaseConfigured()) {
+                const { error: dbError } = await supabase
+                    .from('newsletter_subscriptions')
+                    .insert({ email: email.trim().toLowerCase() });
+
+                if (dbError && dbError.code !== '23505') {
+                    // 23505 = unique_violation (already subscribed) — treat as success
+                    throw dbError;
+                }
+            }
             setSubmitted(true);
+        } catch (err) {
+            setError('حدث خطأ، يرجى المحاولة مجدداً.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -43,19 +64,23 @@ export default function ComingSoonEbooks() {
                 </p>
 
                 {!submitted ? (
-                    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
-                        <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            placeholder="أدخل بريدك الإلكتروني ليصلك الجديد..."
-                            className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3.5 text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-right"
-                        />
-                        <button type="submit" className="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-extrabold rounded-2xl transition-all shadow-orange-glow shrink-0 hover:scale-105">
-                            سجل باش يوصلك الجديد
-                        </button>
-                    </form>
+                    <div className="max-w-md mx-auto space-y-3">
+                        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                            <input
+                                type="email"
+                                required
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                placeholder="أدخل بريدك الإلكتروني ليصلك الجديد..."
+                                className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3.5 text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-right"
+                            />
+                            <button type="submit" disabled={isLoading} className="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-70 text-white font-extrabold rounded-2xl transition-all shadow-orange-glow shrink-0 hover:scale-105 flex items-center justify-center gap-2">
+                                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                                سجل باش يوصلك الجديد
+                            </button>
+                        </form>
+                        {error && <p className="text-red-400 text-sm font-semibold text-center">{error}</p>}
+                    </div>
                 ) : (
                     <div className="inline-flex items-center gap-2 bg-emerald-950/80 border border-emerald-700/80 text-emerald-300 px-6 py-4 rounded-2xl text-base font-bold shadow-lg backdrop-blur-md">
                         <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />

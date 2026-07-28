@@ -28,7 +28,6 @@ import {
     CheckCircle2
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { MOCK_RECIPES } from '@/lib/mock-data';
 import RecipeCard from '@/components/RecipeCard';
 import CookingTimer from '@/components/CookingTimer';
 import CommentThread from '@/components/CommentThread';

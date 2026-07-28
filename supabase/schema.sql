@@ -155,6 +155,16 @@ CREATE TABLE IF NOT EXISTS public.cooking_reels (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 13. NEWSLETTER SUBSCRIPTIONS
+CREATE TABLE IF NOT EXISTS public.newsletter_subscriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.newsletter_subscriptions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can subscribe to newsletter" ON public.newsletter_subscriptions FOR INSERT WITH CHECK (true);
+
 -- ========================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ========================================================

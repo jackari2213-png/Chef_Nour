@@ -4,14 +4,13 @@ import React, { use } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Utensils } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { MOCK_CATEGORIES } from '@/lib/mock-data';
 import RecipeCard from '@/components/RecipeCard';
 
 export default function CategoryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
-    const { recipes } = useApp();
+    const { recipes, categories } = useApp();
 
-    const category = MOCK_CATEGORIES.find(c => c.slug === slug) || MOCK_CATEGORIES[0];
+    const category = categories.find(c => c.slug === slug) || categories[0];
     const categoryRecipes = recipes.filter(r => r.category_id === category.id || r.category_name_ar === category.name_ar);
 
     return (

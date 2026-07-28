@@ -19,7 +19,6 @@ import { useApp } from '@/lib/store';
 import { MOCK_CATEGORIES } from '@/lib/mock-data';
 import RecipeCard from '@/components/RecipeCard';
 import CategoryCard from '@/components/CategoryCard';
-import VideoReels from '@/components/VideoReels';
 import CommentThread from '@/components/CommentThread';
 
 export default function HomePage() {
@@ -278,8 +277,6 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* 4. VIDEO REELS SECTION */}
-            <VideoReels />
 
             {/* 5. COMMUNITY DISCUSSION SECTION */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

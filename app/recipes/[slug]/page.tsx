@@ -35,14 +35,46 @@ import CommentThread from '@/components/CommentThread';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
-    const { recipes, isFavorite, toggleFavorite, user } = useApp();
+    const { recipes, isFavorite, toggleFavorite, isLoading } = useApp();
 
-    // Find recipe or fallback to first recipe (e.g. Chicken Tagine)
-    const recipe = recipes.find(r => r.slug === slug) || recipes[1] || MOCK_RECIPES[1];
-    const favorite = isFavorite(recipe.id);
+    const recipe = recipes.find(r => r.slug === slug);
 
     // Active gallery image state
     const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+    // Ingredients checklist state
+    const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
+    const [activeStep, setActiveStep] = useState<number>(0);
+    // Fullscreen Cooking Mode state
+    const [cookingModeOpen, setCookingModeOpen] = useState<boolean>(false);
+    const [cookingStep, setCookingStep] = useState<number>(0);
+
+    // Wait until recipes are loaded from Supabase
+    if (isLoading) {
+        return (
+            <div className="min-h-[70vh] flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-500 rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (!recipe) {
+        return (
+            <div className="min-h-[70vh] flex items-center justify-center pt-10 pb-12 px-4 text-center">
+                <div className="bg-white p-8 rounded-3xl max-w-sm w-full shadow-sm border border-gray-100">
+                    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Utensils className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">الوصفة غير موجودة</h2>
+                    <p className="text-sm text-gray-500 mb-6 font-medium">عذراً، لم نتمكن من العثور على الوصفة المطلوبة أو أنه تم حذفها.</p>
+                    <Link href="/recipes" className="inline-flex items-center justify-center w-full bg-brand-500 text-white font-bold text-sm py-3 rounded-xl hover:bg-brand-600 transition-colors">
+                        تصفح الوصفات الأخرى
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    const favorite = isFavorite(recipe.id);
 
     // Build dynamic gallery from main_image + gallery_images + step images
     const rawGallery = [
@@ -54,13 +86,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
     const galleryList = Array.from(new Set(rawGallery.filter(Boolean)));
     const currentHeroImage = galleryList[selectedImageIndex] || recipe.main_image;
 
-    // Ingredients checklist state
-    const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
-    const [activeStep, setActiveStep] = useState<number>(0);
-
-    // Fullscreen Cooking Mode state
-    const [cookingModeOpen, setCookingModeOpen] = useState<boolean>(false);
-    const [cookingStep, setCookingStep] = useState<number>(0);
     // Select all / Toggle all ingredients
     const allChecked = recipe.ingredients.every(i => checkedIngredients[i.id]);
 

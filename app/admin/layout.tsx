@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -18,7 +18,7 @@ import {
     ShieldCheck,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
+import { isSupabaseConfigured } from '@/lib/supabase-client';
 import { supabaseSignIn, supabaseSignOut } from '@/lib/useAuth';
 
 const ADMIN_EMAIL = 'nour@chefnour.com';
@@ -156,28 +156,10 @@ function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
 // ─── Main Admin Layout ────────────────────────────────────────────────────────
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { user, setUser, logout } = useApp();
-    const [sessionChecked, setSessionChecked] = useState(false);
+    const { user, sessionReady, setUser, logout } = useApp();
 
-    // On mount: verify real Supabase session — don't trust store state alone
-    useEffect(() => {
-        const checkSession = async () => {
-            if (isSupabaseConfigured()) {
-                const { data: { session } } = await supabase.auth.getSession();
-
-                if (!session) {
-                    // No valid Supabase session → clear user state
-                    setUser(null);
-                }
-                // If session exists, onAuthStateChange in store.tsx already populated user
-            }
-            setSessionChecked(true);
-        };
-        checkSession();
-    }, [setUser]);
-
-    // Loading state while checking Supabase session
-    if (!sessionChecked) {
+    // Loading state while store resolves session
+    if (!sessionReady) {
         return (
             <div className="min-h-screen bg-gray-950 flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -187,7 +169,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     // Guard: show login screen if not authenticated as admin
     if (!user || user.role !== 'admin') {
-        return <AdminLoginGate onSuccess={() => setSessionChecked(true)} />;
+        return <AdminLoginGate onSuccess={() => {}} />;
     }
 
     const navItems = [

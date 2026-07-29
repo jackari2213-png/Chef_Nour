@@ -15,6 +15,7 @@ interface AppContextType {
 
     // User Auth
     user: UserProfile | null;
+    sessionReady: boolean;
     setUser: (user: UserProfile | null) => void;  // exposed so admin login gate can set it directly
     login: (email: string, role?: 'user' | 'admin') => void; // legacy — kept for compatibility
     logout: () => Promise<void>;
@@ -63,6 +64,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
     const [orders, setOrders] = useState<Order[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [sessionReady, setSessionReady] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     // ─── Fetch real data from Supabase on mount ───────────────────────────────
@@ -143,9 +145,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Restore Supabase session on mount
-        resolveCurrentSession().then(profile => {
-            if (profile) setUser(profile);
-        });
+        (async () => {
+            try {
+                const profile = await resolveCurrentSession();
+                if (profile) setUser(profile);
+            } catch (e) {
+                console.error('Error resolving session:', e);
+            } finally {
+                setSessionReady(true);
+            }
+        })();
 
         // Subscribe to auth state changes (login/logout in any tab)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -591,6 +600,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 toggleFavorite,
                 isFavorite,
                 user,
+                sessionReady,
                 setUser,
                 login,
                 logout,

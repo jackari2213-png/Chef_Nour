@@ -178,7 +178,7 @@ export default function Header() {
                                         className="p-1 rounded-full text-gray-700 hover:text-brand-600 transition-colors"
                                     >
                                         <img
-                                            src={user.avatar_url || '/chef-nour.jpg'}
+                                            src={user.avatar_url || (user.role === 'admin' ? '/chef-nour.jpg' : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.full_name)}&backgroundColor=f97316`)}
                                             alt={user.full_name}
                                             className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-500"
                                         />

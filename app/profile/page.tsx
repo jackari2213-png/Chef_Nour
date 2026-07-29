@@ -26,9 +26,9 @@ export default function ProfilePage() {
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-card flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4 text-right w-full sm:w-auto">
                     <img
-                        src={user.avatar_url}
+                        src={user.avatar_url || (user.role === 'admin' ? '/chef-nour.jpg' : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.full_name)}&backgroundColor=f97316`)}
                         alt={user.full_name}
-                        className="w-20 h-20 rounded-full object-cover ring-4 ring-brand-500 shadow-md"
+                        className="w-20 h-20 rounded-full object-cover ring-4 ring-brand-500 shadow-md bg-orange-100"
                     />
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">

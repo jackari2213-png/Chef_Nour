@@ -20,12 +20,14 @@ import {
 import { useApp } from '@/lib/store';
 import { isSupabaseConfigured } from '@/lib/supabase-client';
 import { supabaseSignIn, supabaseSignOut } from '@/lib/useAuth';
+import { useTranslation } from '@/lib/useTranslation';
 
 const ADMIN_EMAIL = 'nour@chefnour.com';
 
 // ─── Admin Login Gate ─────────────────────────────────────────────────────────
 function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
     const { setUser, login } = useApp();
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +45,7 @@ function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
 
                 if (profile.role !== 'admin' && email.trim().toLowerCase() !== ADMIN_EMAIL) {
                     await supabaseSignOut();
-                    setError('هذا الحساب لا يمتلك صلاحيات الأدمين');
+                    setError(t('auth.adminNotAdmin'));
                 } else {
                     // Force admin role for the admin email
                     setUser({ ...profile, role: 'admin' });
@@ -55,11 +57,11 @@ function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
                     login(email.trim().toLowerCase(), 'admin');
                     onSuccess();
                 } else {
-                    setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+                    setError(t('auth.adminError'));
                 }
             }
         } catch (err: any) {
-            setError(err.message || 'حدث خطأ في الاتصال، حاول مرة أخرى');
+            setError(err.message || t('auth.adminError'));
         }
 
         setLoading(false);
@@ -77,19 +79,19 @@ function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
                         <ChefHat className="w-8 h-8" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-white">الشيف نور</h1>
-                        <p className="text-xs text-gray-400 font-medium">لوحة تحكم الأدمين — دخول محمي</p>
+                        <h1 className="text-2xl font-black text-white">{t('auth.adminLoginTitle')}</h1>
+                        <p className="text-xs text-gray-400 font-medium">{t('auth.adminOnly')}</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 rounded-3xl p-8 space-y-5 shadow-2xl">
                     <div className="flex items-center gap-2 text-brand-400 text-sm font-bold">
                         <ShieldCheck className="w-4 h-4" />
-                        <span>دخول مخصص للمسؤولين فقط</span>
+                        <span>{t('auth.adminOnly')}</span>
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-400 block">البريد الإلكتروني</label>
+                        <label className="text-xs font-bold text-gray-400 block">{t('auth.adminEmail')}</label>
                         <input
                             type="email"
                             required
@@ -101,7 +103,7 @@ function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-400 block">كلمة المرور</label>
+                        <label className="text-xs font-bold text-gray-400 block">{t('auth.adminPassword')}</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? 'text' : 'password'}
@@ -139,12 +141,12 @@ function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
                         ) : (
                             <Lock className="w-4 h-4" />
                         )}
-                        <span>{loading ? 'جاري التحقق...' : 'دخول للوحة التحكم'}</span>
+                        <span>{loading ? t('auth.adminVerifying') : t('auth.adminLoginBtn')}</span>
                     </button>
 
                     <div className="text-center">
                         <Link href="/" className="text-xs text-gray-500 hover:text-gray-300 underline underline-offset-2">
-                            ← العودة إلى الموقع
+                            {t('auth.backToSite')}
                         </Link>
                     </div>
                 </form>
@@ -157,6 +159,7 @@ function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { user, sessionReady, setUser, logout } = useApp();
+    const { t, getLocalizedField } = useTranslation();
 
     // Loading state while store resolves session
     if (!sessionReady) {
@@ -173,11 +176,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     const navItems = [
-        { href: '/admin', label: 'لوحة التحكم', icon: LayoutDashboard },
-        { href: '/admin/recipes', label: 'إدارة الوصفات', icon: Utensils },
-        { href: '/admin/categories', label: 'إدارة الفئات والتصنيفات', icon: Grid },
-        { href: '/admin/moderation', label: 'إدارة التعليقات والصور', icon: MessageSquare },
-        { href: '/admin/products', label: 'المنتجات الرقمية (الكتب)', icon: BookOpen },
+        { href: '/admin', label: t('admin.dashboard'), icon: LayoutDashboard },
+        { href: '/admin/recipes', label: t('admin.recipes'), icon: Utensils },
+        { href: '/admin/categories', label: t('admin.categories'), icon: Grid },
+        { href: '/admin/moderation', label: t('admin.moderation'), icon: MessageSquare },
+        { href: '/admin/products', label: t('admin.products'), icon: BookOpen },
     ];
 
     return (
@@ -192,12 +195,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 <ChefHat className="w-6 h-6" />
                             </div>
                             <div>
-                                <span className="font-extrabold text-lg text-white block">لوحة التحكم</span>
-                                <span className="text-[10px] text-brand-400 font-bold">الشيف نور CMS</span>
+                                <span className="font-extrabold text-lg text-white block">{t('admin.title')}</span>
+                                <span className="text-[10px] text-brand-400 font-bold">{t('admin.cmsTitle')}</span>
                             </div>
                         </div>
-                        <Link href="/" className="text-gray-400 hover:text-white text-xs font-bold flex items-center gap-1" title="العودة للموقع">
-                            <span>الموقع</span>
+                        <Link href="/" className="text-gray-400 hover:text-white text-xs font-bold flex items-center gap-1" title={t('admin.backToSite')}>
+                            <span>{t('admin.backToSite')}</span>
                             <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -224,12 +227,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div className="flex items-center gap-3">
                         <img
                             src={user.avatar_url || '/chef-nour.jpg'}
-                            alt="الشيف نور"
+                            alt={t('auth.adminLoginTitle')}
                             className="w-9 h-9 rounded-full object-cover ring-2 ring-brand-500"
                         />
                         <div>
                             <span className="block text-xs font-bold text-white">{user.full_name}</span>
-                            <span className="text-[10px] text-gray-500">مسؤول النظام</span>
+                            <span className="text-[10px] text-gray-500">{t('admin.siteManager')}</span>
                         </div>
                     </div>
 
@@ -238,7 +241,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-red-900 border border-transparent hover:border-red-700 text-gray-300 hover:text-red-300 text-xs font-bold py-2.5 rounded-xl transition-all"
                     >
                         <LogOut className="w-4 h-4" />
-                        <span>تسجيل الخروج</span>
+                        <span>{t('admin.logout')}</span>
                     </button>
                 </div>
 

@@ -1,11 +1,13 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { Tajawal, Cairo } from 'next/font/google';
+import { Tajawal, Cairo, Inter } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/lib/store';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CookingBackground from '@/components/CookingBackground';
+import LanguageProvider from '@/components/LanguageProvider';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const tajawal = Tajawal({
     subsets: ['arabic'],
@@ -17,6 +19,12 @@ const cairo = Cairo({
     subsets: ['arabic'],
     weight: ['400', '600', '700', '800', '900'],
     variable: '--font-cairo',
+});
+
+const inter = Inter({
+    subsets: ['latin'],
+    weight: ['400', '500', '600', '700', '800', '900'],
+    variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
@@ -38,15 +46,18 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="ar" dir="rtl" className={`${tajawal.variable} ${cairo.variable}`}>
+        <html lang="ar" dir="rtl" className={`${tajawal.variable} ${cairo.variable} ${inter.variable}`}>
             <body className="font-sans bg-surface-bg text-gray-900 antialiased selection:bg-brand-500 selection:text-white min-h-screen flex flex-col justify-between relative">
                 <AppProvider>
-                    <CookingBackground />
-                    <Header />
-                    <main className="flex-grow">
-                        {children}
-                    </main>
-                    <Footer />
+                    <LanguageProvider>
+                        <CookingBackground />
+                        <Header />
+                        <main className="flex-grow page-enter">
+                            {children}
+                        </main>
+                        <ScrollToTop />
+                        <Footer />
+                    </LanguageProvider>
                 </AppProvider>
             </body>
         </html>

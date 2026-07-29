@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation';
 import { BookOpen, CheckCircle2, ShieldCheck, CreditCard, Lock, Download, Star, ArrowRight } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { MOCK_PRODUCTS } from '@/lib/mock-data';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
     const router = useRouter();
+    const { t, getLocalizedField } = useTranslation();
     const { createOrder, user } = useApp();
 
     const product = MOCK_PRODUCTS.find(p => p.slug === slug) || MOCK_PRODUCTS[0];
@@ -39,11 +41,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
             {/* Breadcrumbs */}
             <nav className="flex items-center gap-2 text-xs font-bold text-gray-500">
-                <Link href="/" className="hover:text-brand-600">الرئيسية</Link>
+                <Link href="/" className="hover:text-brand-600">{t('common.home')}</Link>
                 <span>/</span>
-                <Link href="/store" className="hover:text-brand-600">متجر الكتب</Link>
+                <Link href="/store" className="hover:text-brand-600">{t('store.breadcrumbStore')}</Link>
                 <span>/</span>
-                <span className="text-gray-900 font-extrabold">{product.title_ar}</span>
+                <span className="text-gray-900 font-extrabold">{getLocalizedField(product, 'title')}</span>
             </nav>
 
             {/* Main Grid */}
@@ -53,11 +55,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <div className="lg:col-span-5 space-y-6">
                     <div className="bg-gradient-to-tr from-brand-100 to-amber-50 rounded-3xl p-8 border border-brand-200 text-center shadow-soft relative overflow-hidden">
                         <span className="absolute top-4 right-4 bg-red-500 text-white font-black text-xs px-3 py-1 rounded-full shadow-md z-10">
-                            خصم {product.discount_percent}%
+                            {t('store.discount', { percent: product.discount_percent ?? 0 })}
                         </span>
                         <img
                             src={product.cover_image}
-                            alt={product.title_ar}
+                            alt={getLocalizedField(product, 'title')}
                             className="rounded-2xl shadow-2xl mx-auto max-w-[260px] border-4 border-white transform hover:scale-105 transition-transform"
                         />
                     </div>
@@ -65,10 +67,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                     <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-3">
                         <div className="flex items-center gap-2 text-xs font-extrabold text-gray-900">
                             <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                            <span>ضمان الشراء الآمن والتحميل الفوري</span>
+                            <span>{t('store.guarantee')}</span>
                         </div>
                         <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                            بمجرد إتمام الطلب، يتم فتح صلاحية التحميل المباشر لكتاب PDF بصيغة فائقة الوضوح قابلة للطباعة والقراءة على كل الأجهزة.
+                            {t('store.securePayment')}
                         </p>
                     </div>
                 </div>
@@ -78,20 +80,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
                     <div className="space-y-2">
                         <span className="text-xs font-black text-brand-600 bg-brand-50 px-3 py-1 rounded-full">
-                            كتاب رقمي صيغة PDF
+                            {t('store.pdfFormat')}
                         </span>
                         <h1 className="text-3xl sm:text-4xl font-black text-gray-900 leading-tight">
-                            {product.title_ar}
+                            {getLocalizedField(product, 'title')}
                         </h1>
                     </div>
 
                     {/* Pricing Box */}
                     <div className="bg-gray-50 rounded-3xl p-6 border border-gray-200 flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <span className="block text-xs font-bold text-gray-400">السعر النهائي:</span>
+                            <span className="block text-xs font-bold text-gray-400">{t('store.discountedPrice')}:</span>
                             <div className="flex items-baseline gap-3">
-                                <span className="text-3xl sm:text-4xl font-black text-brand-600">{product.price_mad} درهم</span>
-                                <span className="text-sm font-bold text-gray-400 line-through">{product.old_price_mad} درهم</span>
+                                <span className="text-3xl sm:text-4xl font-black text-brand-600">{product.price_mad} {t('common.currency')}</span>
+                                <span className="text-sm font-bold text-gray-400 line-through">{product.old_price_mad} {t('common.currency')}</span>
                             </div>
                         </div>
 
@@ -99,13 +101,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                             onClick={() => setCheckoutModalOpen(true)}
                             className="bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm px-8 py-4 rounded-2xl shadow-orange-glow hover:scale-105 active:scale-95 transition-all"
                         >
-                            اشتري الآن والتحميل فوراً ←
+                            {t('store.buyNow')}
                         </button>
                     </div>
 
                     {/* Features */}
                     <div className="space-y-3">
-                        <h3 className="text-lg font-black text-gray-900">محتويات ومميزات الكتاب:</h3>
+                        <h3 className="text-lg font-black text-gray-900">{t('store.features')}:</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {product.features?.map((feat, idx) => (
                                 <div key={idx} className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-xs flex items-center gap-2 text-xs font-bold text-gray-800">
@@ -117,9 +119,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                     </div>
 
                     <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-2">
-                        <h4 className="font-bold text-sm text-gray-900">وصف الكتاب:</h4>
+                        <h4 className="font-bold text-sm text-gray-900">{t('store.description')}:</h4>
                         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
-                            {product.description_ar}
+                            {getLocalizedField(product, 'description')}
                         </p>
                     </div>
 
@@ -135,18 +137,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                         <div className="text-right border-b border-gray-100 pb-4">
                             <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
                                 <CreditCard className="w-5 h-5 text-brand-500" />
-                                إتمام شراء الكتاب الرقمي
+                                {t('store.checkout')}
                             </h3>
-                            <p className="text-xs text-gray-500 mt-1">الدفع عبر البوابة التجريبية / بطاقة بنكية</p>
+                            <p className="text-xs text-gray-500 mt-1">{t('store.paymentInfo')}</p>
                         </div>
 
                         <form onSubmit={handleCheckoutSubmit} className="space-y-4 text-right">
                             <div>
-                                <label className="text-xs font-extrabold text-gray-700 block mb-1">الاسم الكامل:</label>
+                                <label className="text-xs font-extrabold text-gray-700 block mb-1">{t('store.yourName')}:</label>
                                 <input
                                     type="text"
                                     required
-                                    placeholder="أدخلي اسمك الكامل"
+                                    placeholder={t('store.yourNamePlaceholder')}
                                     value={customerName}
                                     onChange={(e) => setCustomerName(e.target.value)}
                                     className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-brand-500"
@@ -154,11 +156,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                             </div>
 
                             <div>
-                                <label className="text-xs font-extrabold text-gray-700 block mb-1">البريد الإلكتروني للتحميل:</label>
+                                <label className="text-xs font-extrabold text-gray-700 block mb-1">{t('store.yourEmail')}:</label>
                                 <input
                                     type="email"
                                     required
-                                    placeholder="أدخلي بريدك الإلكتروني"
+                                    placeholder={t('store.yourEmailPlaceholder')}
                                     value={customerEmail}
                                     onChange={(e) => setCustomerEmail(e.target.value)}
                                     className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-semibold focus:outline-none focus:border-brand-500"
@@ -166,8 +168,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                             </div>
 
                             <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100 flex items-center justify-between text-xs font-bold text-brand-900">
-                                <span>المبلغ المطلوب:</span>
-                                <span className="text-base font-black text-brand-600">{product.price_mad} درهم</span>
+                                <span>{t('store.total')}:</span>
+                                <span className="text-base font-black text-brand-600">{product.price_mad} {t('common.currency')}</span>
                             </div>
 
                             <div className="flex gap-3 pt-2">
@@ -176,7 +178,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                                     onClick={() => setCheckoutModalOpen(false)}
                                     className="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs py-3 rounded-xl transition-colors"
                                 >
-                                    إلغاء
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -184,11 +186,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                                     className="w-2/3 bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-3 rounded-xl shadow-orange-glow transition-all flex items-center justify-center gap-2"
                                 >
                                     {isProcessing ? (
-                                        <span>جاري معالجة الطلب...</span>
+                                        <span>{t('store.processing')}</span>
                                     ) : (
                                         <>
                                             <Lock className="w-3.5 h-3.5" />
-                                            <span>تأكيد الشراء والتحميل</span>
+                                            <span>{t('store.confirmPurchase')}</span>
                                         </>
                                     )}
                                 </button>

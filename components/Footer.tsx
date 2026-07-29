@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/lib/store';
 import { MOCK_CATEGORIES } from '@/lib/mock-data';
+import { useTranslation } from '@/lib/useTranslation';
+import ScrollToTop from '@/components/ScrollToTop';
 
 // ─── Custom Cooking SVG Icons ───────────────────────────────────────────────
 
@@ -91,6 +93,8 @@ const IconFacebook = ({ className }: { className?: string }) => (
 
 export default function Footer() {
     const pathname = usePathname();
+    const { t, getLocalizedField } = useTranslation();
+    const { categories, recipes } = useApp();
     const [email, setEmail] = useState('');
     const [subscribed, setSubscribed] = useState(false);
 
@@ -105,10 +109,10 @@ export default function Footer() {
     };
 
     const cookingFeatures = [
-        { icon: IconChefHat, label: 'وصفات مجربة' },
-        { icon: IconPot, label: 'أطباق أصيلة' },
-        { icon: IconWhisk, label: 'حلويات فاخرة' },
-        { icon: IconMortar, label: 'نكهات مغربية' },
+        { icon: IconChefHat, label: t('footer.featureTested') },
+        { icon: IconPot, label: t('footer.featureAuthentic') },
+        { icon: IconWhisk, label: t('footer.featurePastry') },
+        { icon: IconMortar, label: t('footer.featureMoroccan') },
     ];
 
     return (
@@ -150,12 +154,12 @@ export default function Footer() {
                                     <IconChefHat className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <span className="block font-black text-2xl text-white leading-none">الشيف نور</span>
-                                    <span className="text-[10px] font-bold text-brand-400 tracking-widest">CHEF NOUR®</span>
+                                    <span className="block font-black text-2xl text-white leading-none">{t('common.chefNour')}</span>
+                                    <span className="text-[10px] font-bold text-brand-400 tracking-widest">{t('common.chefNourBrand')}</span>
                                 </div>
                             </div>
                             <p className="text-sm text-gray-400 leading-relaxed font-medium">
-                                منصة طهي مغربية أصيلة. وصفات مجربة وناجحة 100% بمقادير مضبوطة وأسرار احترافية من المطبخ مباشرةً إلى مائدتك.
+                                {t('footer.description')}
                             </p>
                         </div>
 
@@ -185,21 +189,24 @@ export default function Footer() {
                     <div>
                         <h3 className="text-brand-400 font-black uppercase tracking-[0.2em] text-xs mb-7 flex items-center gap-2">
                             <span className="w-4 h-px bg-brand-500" />
-                            أقسام الوصفات
+                            {t('footer.recipeSections')}
                         </h3>
                         <ul className="space-y-3">
-                            {MOCK_CATEGORIES.slice(0, 7).map((cat) => (
-                                <li key={cat.id}>
-                                    <Link
-                                        href={`/category/${cat.slug}`}
-                                        className="text-sm text-gray-400 hover:text-brand-400 font-bold transition-colors flex items-center gap-2.5 group"
-                                    >
-                                        <div className="w-1.5 h-1.5 rounded-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        {cat.name_ar}
-                                        <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded-full text-gray-500 mr-auto">{cat.recipe_count}</span>
-                                    </Link>
-                                </li>
-                            ))}
+                            {(categories.length > 0 ? categories : MOCK_CATEGORIES).slice(0, 7).map((cat) => {
+                                const realCount = recipes.filter(r => r.category_id === cat.id || r.category_name_ar === cat.name_ar).length;
+                                return (
+                                    <li key={cat.id}>
+                                        <Link
+                                            href={`/category/${cat.slug}`}
+                                            className="text-sm text-gray-400 hover:text-brand-400 font-bold transition-colors flex items-center gap-2.5 group"
+                                        >
+                                            <div className="w-1.5 h-1.5 rounded-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            {getLocalizedField(cat, 'name')}
+                                            <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded-full text-gray-500 mr-auto">{realCount || cat.recipe_count}</span>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </div>
 
@@ -207,16 +214,16 @@ export default function Footer() {
                     <div>
                         <h3 className="text-brand-400 font-black uppercase tracking-[0.2em] text-xs mb-7 flex items-center gap-2">
                             <span className="w-4 h-px bg-brand-500" />
-                            روابط سريعة
+                            {t('footer.quickLinks')}
                         </h3>
                         <ul className="space-y-3">
                             {[
-                                { label: 'الرئيسية', href: '/' },
-                                { label: 'جميع الوصفات', href: '/recipes' },
-                                { label: 'المفضلة', href: '/favorites' },
-                                { label: 'متجر الكتب الرقمية', href: '/store', badge: 'قريباً' },
-                                { label: 'تواصل معنا', href: '/contact' },
-                                { label: 'حسابي', href: '/profile' },
+                                { label: t('footer.homeLink'), href: '/' },
+                                { label: t('footer.allRecipes'), href: '/recipes' },
+                                { label: t('footer.favoritesLink'), href: '/favorites' },
+                                { label: t('footer.storeLink'), href: '/store', badge: t('footer.storeBadge') },
+                                { label: t('footer.contactLink'), href: '/contact' },
+                                { label: t('footer.profileLink'), href: '/profile' },
                             ].map(({ label, href, badge }) => (
                                 <li key={href}>
                                     <Link
@@ -240,24 +247,24 @@ export default function Footer() {
                     <div>
                         <h3 className="text-brand-400 font-black uppercase tracking-[0.2em] text-xs mb-7 flex items-center gap-2">
                             <span className="w-4 h-px bg-brand-500" />
-                            النشرة الأسبوعية
+                            {t('footer.newsletter')}
                         </h3>
 
                         <div className="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-sm">
-                            <p className="text-sm text-gray-300 font-bold mb-1">احصلي على أحدث الوصفات مجاناً!</p>
+                            <p className="text-sm text-gray-300 font-bold mb-1">{t('footer.newsletterDesc')}</p>
                             <p className="text-xs text-gray-500 font-medium mb-4 leading-relaxed">
-                                نشرة أسبوعية بأسرار الطبخ، وصفات موسمية، وعروض حصرية.
+                                {t('footer.newsletterSub')}
                             </p>
                             {subscribed ? (
                                 <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl p-3 text-xs font-bold text-center flex items-center justify-center gap-2">
                                     <IconSparkle className="w-3.5 h-3.5" />
-                                    تم الاشتراك! شكراً ❤️
+                                    {t('footer.newsletterSuccess')}
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubscribe} className="flex flex-col gap-2">
                                     <input
                                         type="email"
-                                        placeholder="بريدك الإلكتروني..."
+                                        placeholder={t('footer.newsletterPlaceholder')}
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
@@ -265,9 +272,9 @@ export default function Footer() {
                                     />
                                     <button
                                         type="submit"
-                                        className="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-2.5 rounded-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+                                        className="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
                                     >
-                                        <span>اشتركي الآن</span>
+                                        <span>{t('footer.newsletterBtn')}</span>
                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h12M13 7l5 5-5 5" />
                                         </svg>
@@ -279,14 +286,16 @@ export default function Footer() {
 
                 </div>
 
-                {/* ── Bottom Bar — like snack_LeNorm */}
+                <ScrollToTop />
+
+                {/* ── Bottom Bar */}
                 <div className="pt-8 pb-10 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-5">
                     <p className="text-xs text-gray-600 tracking-wider text-center sm:text-right">
                         <a href="/admin" className="hover:text-gray-400 transition-colors">©</a>{' '}
-                        {new Date().getFullYear()} <span className="text-gray-500 font-bold">CHEF NOUR</span> | الشيف نور — جميع الحقوق محفوظة.
+                        {new Date().getFullYear()} <span className="text-gray-500 font-bold">CHEF NOUR</span> | {t('common.chefNour')} — {t('footer.allRights')}
                     </p>
                     <div className="flex items-center gap-2 group">
-                        <span className="text-gray-600 text-[10px] uppercase tracking-[0.2em] font-bold">Crafted by</span>
+                        <span className="text-gray-600 text-[10px] uppercase tracking-[0.2em] font-bold">{t('footer.craftedBy')}</span>
                         <span className="text-brand-500 text-xs font-black tracking-wider flex items-center gap-1 group-hover:text-white transition-colors duration-300">
                             ILYASS SROUBI
                             <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse inline-block" />

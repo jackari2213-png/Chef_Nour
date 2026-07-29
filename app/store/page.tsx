@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { BookOpen, CheckCircle2, Loader2 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function ComingSoonEbooks() {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +31,7 @@ export default function ComingSoonEbooks() {
             }
             setSubmitted(true);
         } catch (err) {
-            setError('حدث خطأ، يرجى المحاولة مجدداً.');
+            setError(t('store.error'));
         } finally {
             setIsLoading(false);
         }
@@ -52,15 +54,15 @@ export default function ComingSoonEbooks() {
                 </div>
 
                 <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 drop-shadow-md tracking-tight">
-                    قريباً
+                    {t('store.title')}
                 </h1>
 
                 <h2 className="text-3xl md:text-5xl font-extrabold text-brand-400 mb-6 drop-shadow-md">
-                    كتب إلكترونية - كتب وصفات
+                    {t('store.subtitle')}
                 </h2>
 
                 <p className="text-lg md:text-2xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed font-medium">
-                    كنوجدو ليكوم مكتبة رقمية متكاملة فيها أحسن الوصفات وأسرار الطبخ. بقاو معنا باش تستافدو من الإصدار الأول!
+                    {t('store.description')}
                 </p>
 
                 {!submitted ? (
@@ -71,12 +73,12 @@ export default function ComingSoonEbooks() {
                                 required
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
-                                placeholder="أدخل بريدك الإلكتروني ليصلك الجديد..."
+                                placeholder={t('store.emailPlaceholder')}
                                 className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3.5 text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-right"
                             />
                             <button type="submit" disabled={isLoading} className="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-70 text-white font-extrabold rounded-2xl transition-all shadow-orange-glow shrink-0 hover:scale-105 flex items-center justify-center gap-2">
                                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                سجل باش يوصلك الجديد
+                                {t('store.buyNow')}
                             </button>
                         </form>
                         {error && <p className="text-red-400 text-sm font-semibold text-center">{error}</p>}
@@ -84,7 +86,7 @@ export default function ComingSoonEbooks() {
                 ) : (
                     <div className="inline-flex items-center gap-2 bg-emerald-950/80 border border-emerald-700/80 text-emerald-300 px-6 py-4 rounded-2xl text-base font-bold shadow-lg backdrop-blur-md">
                         <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
-                        <span>شكراً لتسجيلك! سيتم إشعارك فور إطلاق كتب الوصفات.</span>
+                        <span>{t('store.thankYou')}</span>
                     </div>
                 )}
             </div>

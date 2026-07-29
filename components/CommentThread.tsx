@@ -4,17 +4,18 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/lib/store';
 import { Review } from '@/types';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
+import { useTranslation } from '@/lib/useTranslation';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, t: (key: string, params?: Record<string, string | number>) => string) {
     const now = Date.now();
     const then = new Date(dateStr).getTime();
     const diff = Math.floor((now - then) / 1000);
-    if (diff < 60) return 'الآن';
-    if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
-    if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
-    return `منذ ${Math.floor(diff / 86400)} يوم`;
+    if (diff < 60) return t('comments.justNow');
+    if (diff < 3600) return t('comments.minutesAgo', { count: Math.floor(diff / 60) });
+    if (diff < 86400) return t('comments.hoursAgo', { count: Math.floor(diff / 3600) });
+    return t('comments.daysAgo', { count: Math.floor(diff / 86400) });
 }
 
 function StarRow({ count }: { count: number }) {
@@ -32,14 +33,17 @@ function StarRow({ count }: { count: number }) {
 
 // ─── Admin Badge ──────────────────────────────────────────────────────────────
 
-const AdminBadge = () => (
-    <span className="inline-flex items-center gap-1 bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm shrink-0">
-        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
-        </svg>
-        الشيف نور
-    </span>
-);
+const AdminBadge = () => {
+    const { t } = useTranslation();
+    return (
+        <span className="inline-flex items-center gap-1 bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm shrink-0">
+            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+            </svg>
+            {t('comments.chefReply')}
+        </span>
+    );
+};
 
 // ─── Reply Input Box ──────────────────────────────────────────────────────────
 
@@ -49,6 +53,7 @@ interface ReplyInputProps {
 }
 
 function ReplyInput({ parentId, onClose }: ReplyInputProps) {
+    const { t } = useTranslation();
     const { user, addReply } = useApp();
     const [text, setText] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -70,34 +75,35 @@ function ReplyInput({ parentId, onClose }: ReplyInputProps) {
 
     if (done) {
         return (
-            <div className="mt-3 flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2.5 rounded-2xl border border-emerald-200 text-xs font-bold">
+            <div className="mt-3 flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2.5 rounded-2xl border border-emerald-200 text-xs font-bold animate-in fade-in slide-in-from-top-2 duration-200">
                 <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-                تم نشر ردك! شكراً 🎉
+                {t('comments.commentPending')}
             </div>
         );
     }
 
     return (
         <form onSubmit={handleSubmit} className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="transition-all duration-300 ease-out" style={{ animation: 'fadeSlideUp 0.3s ease-out' }}>
             <div className="flex items-start gap-2">
                 <img
                     src={isAdmin ? '/chef-nour.jpg' : (user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80')}
-                    alt={user?.full_name || 'أنت'}
+                    alt={user?.full_name || t('recipeDetail.yourName')}
                     className={`w-8 h-8 rounded-full object-cover shrink-0 ring-2 ${isAdmin ? 'ring-brand-500' : 'ring-gray-200'}`}
                 />
                 <div className="flex-1 space-y-2">
                     {isAdmin && (
                         <div className="flex items-center gap-1.5 mb-1">
                             <AdminBadge />
-                            <span className="text-[10px] text-gray-400 font-medium">تردين كـ الشيف نور</span>
+                            <span className="text-[10px] text-gray-400 font-medium">{t('comments.chefReply')}</span>
                         </div>
                     )}
                     <textarea
                         autoFocus
                         rows={2}
-                        placeholder={isAdmin ? 'اكتبي ردك الرسمي كالشيف نور...' : 'اكتب ردك هنا...'}
+                        placeholder={isAdmin ? t('recipeDetail.replyPlaceholder') : t('recipeDetail.replyPlaceholder')}
                         value={text}
                         onChange={e => setText(e.target.value)}
                         className="w-full text-sm bg-white border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 rounded-2xl px-3 py-2 text-right text-gray-800 resize-none outline-none transition-all placeholder-gray-400"
@@ -105,7 +111,7 @@ function ReplyInput({ parentId, onClose }: ReplyInputProps) {
                     <div className="flex items-center justify-end gap-2">
                         <button type="button" onClick={onClose}
                             className="text-xs font-bold text-gray-400 hover:text-gray-600 px-3 py-1.5 rounded-xl transition-colors">
-                            إلغاء
+                            {t('common.close')}
                         </button>
                         <button
                             type="submit"
@@ -115,11 +121,12 @@ function ReplyInput({ parentId, onClose }: ReplyInputProps) {
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h12M13 7l5 5-5 5" />
                             </svg>
-                            نشر الرد
+                            {t('comments.reply')}
                         </button>
                     </div>
                 </div>
             </div>
+        </div>
         </form>
     );
 }
@@ -132,6 +139,7 @@ interface CommentCardProps {
 }
 
 function CommentCard({ review, depth }: CommentCardProps) {
+    const { t } = useTranslation();
     const [replyOpen, setReplyOpen] = useState(false);
     const [liked, setLiked] = useState(false);
     const [localLikes, setLocalLikes] = useState(review.likes_count ?? 0);
@@ -173,7 +181,7 @@ function CommentCard({ review, depth }: CommentCardProps) {
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
                                 {isTop && review.rating > 0 && <StarRow count={review.rating} />}
-                                <span className="text-[10px] text-gray-400 font-medium">{timeAgo(review.created_at)}</span>
+                                <span className="text-[10px] text-gray-400 font-medium">{timeAgo(review.created_at, t)}</span>
                             </div>
                         </div>
                     </div>
@@ -181,7 +189,7 @@ function CommentCard({ review, depth }: CommentCardProps) {
                     {/* Moderation status badge (top-level only) */}
                     {isTop && (
                         <span className={`shrink-0 text-[9px] font-black px-2 py-0.5 rounded-full border ${review.moderation_status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>
-                            {review.moderation_status === 'approved' ? '✓ منشور' : '⏳ قيد المراجعة'}
+                            {review.moderation_status === 'approved' ? t('comments.approved') : t('comments.pending')}
                         </span>
                     )}
                 </div>
@@ -194,7 +202,7 @@ function CommentCard({ review, depth }: CommentCardProps) {
                 {/* Photo attachment (top-level only) */}
                 {review.photo_url && isTop && (
                     <div className="rounded-2xl overflow-hidden border border-gray-100 max-w-xs aspect-video">
-                        <img src={review.photo_url} alt="صورة التطبيق" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                        <img src={review.photo_url} alt={t('comments.photo')} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                     </div>
                 )}
 
@@ -219,7 +227,7 @@ function CommentCard({ review, depth }: CommentCardProps) {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                         </svg>
-                        رد
+                        {t('comments.reply')}
                     </button>
                 </div>
 
@@ -249,6 +257,7 @@ interface NewCommentFormProps {
 }
 
 function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
+    const { t } = useTranslation();
     const { user, addReview } = useApp();
     const [text, setText] = useState('');
     const [rating, setRating] = useState(5);
@@ -316,7 +325,7 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
 
     const handleGuestSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const name = guestName.trim() || 'زائر';
+        const name = guestName.trim() || t('recipeDetail.yourName');
         try {
             localStorage.setItem('chef_nour_guest_name', name);
             if (guestEmail.trim()) localStorage.setItem('chef_nour_guest_email', guestEmail.trim());
@@ -331,8 +340,8 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                 <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>تم إرسال تعليقك للمراجعة — شكراً لك! ❤️</span>
-                <span className="text-xs text-emerald-500 font-medium">سيظهر بعد موافقة الشيف نور</span>
+                <span>{t('comments.commentPending')}</span>
+                <span className="text-xs text-emerald-500 font-medium">{t('comments.pending')}</span>
             </div>
         );
     }
@@ -351,7 +360,7 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                             />
                             <div>
                                 <span className="font-bold text-gray-800 text-sm">{user.full_name}</span>
-                                <span className="text-[10px] text-gray-400 block">تعلق باسم حسابك</span>
+                                <span className="text-[10px] text-gray-400 block">{t('comments.yourComment')}</span>
                             </div>
                         </>
                     ) : (
@@ -360,11 +369,11 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                                 💬
                             </div>
                             <div className="flex-1">
-                                <span className="font-black text-gray-900 text-sm">شاركينا تجربتك</span>
+                                <span className="font-black text-gray-900 text-sm">{t('recipeDetail.shareYourThoughts')}</span>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                    <a href="/login" className="text-[10px] text-brand-500 font-bold hover:underline">دخول بحساب</a>
+                                    <a href="/login" className="text-[10px] text-brand-500 font-bold hover:underline">{t('comments.loginToComment')}</a>
                                     <span className="text-[10px] text-gray-300">•</span>
-                                    <span className="text-[10px] text-gray-400">أو علق كزائر 👇</span>
+                                    <span className="text-[10px] text-gray-400">{t('recipeDetail.leaveReview')}</span>
                                 </div>
                             </div>
                         </>
@@ -373,7 +382,7 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
 
                 {/* Star Rating */}
                 <div className="flex items-center gap-1 justify-end">
-                    <span className="text-xs text-gray-500 font-medium ml-2">تقييمك:</span>
+                    <span className="text-xs text-gray-500 font-medium ml-2">{t('recipeDetail.rating')}:</span>
                     {[1, 2, 3, 4, 5].map(i => (
                         <button
                             key={i}
@@ -395,7 +404,7 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                 <textarea
                     rows={3}
                     required
-                    placeholder="هل جربتي الوصفة؟ شاركينا النتيجة، النصيحة، أو السؤال..."
+                    placeholder={t('recipeDetail.commentPlaceholder')}
                     value={text}
                     onChange={e => setText(e.target.value)}
                     className="w-full text-sm bg-gray-50 border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 rounded-2xl px-4 py-3 text-right text-gray-800 resize-none outline-none transition-all placeholder-gray-400"
@@ -409,7 +418,7 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h12M13 7l5 5-5 5" />
                     </svg>
-                    نشر التعليق
+                    {t('comments.postComment')}
                 </button>
             </form>
 
@@ -421,19 +430,19 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                         {/* Header */}
                         <div className="text-center space-y-1">
                             <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto text-2xl">👋</div>
-                            <h3 className="font-black text-gray-900 text-base">من أنت؟</h3>
-                            <p className="text-xs text-gray-500">علق بدون تسجيل — فقط اسمك</p>
+                            <h3 className="font-black text-gray-900 text-base">{t('recipeDetail.yourName')}</h3>
+                            <p className="text-xs text-gray-500">{t('recipeDetail.shareYourThoughts')}</p>
                         </div>
 
                         <form onSubmit={handleGuestSubmit} className="space-y-3">
                             {/* Name */}
                             <div>
-                                <label className="text-xs font-bold text-gray-700 block mb-1">الاسم الأول *</label>
+                                <label className="text-xs font-bold text-gray-700 block mb-1">{t('recipeDetail.yourName')} *</label>
                                 <input
                                     type="text"
                                     autoFocus
                                     required
-                                    placeholder="مثال: فاطمة، عمر..."
+                                    placeholder={t('recipeDetail.yourName')}
                                     value={guestName}
                                     onChange={e => setGuestName(e.target.value)}
                                     className="w-full bg-gray-50 border border-gray-200 focus:border-brand-400 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none transition-all"
@@ -443,8 +452,8 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                             {/* Email (optional) */}
                             <div>
                                 <label className="text-xs font-bold text-gray-700 block mb-1">
-                                    البريد الإلكتروني
-                                    <span className="text-gray-400 font-medium mr-1">(اختياري — لمعرفتك متى يرد الشيف)</span>
+                                    {t('recipeDetail.yourComment')}
+                                    <span className="text-gray-400 font-medium mr-1">({t('comments.photo')})</span>
                                 </label>
                                 <input
                                     type="email"
@@ -461,20 +470,20 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
                                     onClick={() => setShowIdentityModal(false)}
                                     className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
                                 >
-                                    إلغاء
+                                    {t('common.close')}
                                 </button>
                                 <button
                                     type="submit"
                                     className="flex-1 py-2.5 rounded-xl text-xs font-black bg-brand-500 hover:bg-brand-600 text-white shadow-md transition-all"
                                 >
-                                    نشر التعليق ✓
+                                    {t('comments.postComment')} ✓
                                 </button>
                             </div>
                         </form>
 
                         <div className="text-center border-t border-gray-100 pt-3">
                             <a href="/login" className="text-xs text-brand-500 font-bold hover:underline">
-                                تسجيل الدخول بحساب كامل ←
+                                {t('recipeDetail.loginToReview')} ←
                             </a>
                         </div>
                     </div>
@@ -499,6 +508,7 @@ export default function CommentThread({
     showForm = true,
     limit,
 }: CommentThreadProps) {
+    const { t } = useTranslation();
     const { reviews } = useApp();
     const [visibleCount, setVisibleCount] = useState(2);
 
@@ -544,7 +554,7 @@ export default function CommentThread({
                                 onClick={() => setVisibleCount(prev => prev + 3)}
                                 className="bg-brand-50 hover:bg-brand-100 text-brand-600 font-extrabold text-xs px-6 py-2.5 rounded-2xl border border-brand-200 transition-all shadow-xs flex items-center gap-2 mx-auto"
                             >
-                                <span>عرض باقي التعليقات ({tree.length - visibleCount} تعليق متبقي)</span>
+                                <span>{t('comments.loadMore')} ({tree.length - visibleCount})</span>
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -559,7 +569,7 @@ export default function CommentThread({
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                     </div>
-                    <p className="text-sm font-bold text-gray-500">كن أول من يعلق ويشارك تجربته!</p>
+                    <p className="text-sm font-bold text-gray-500">{t('comments.noComments')}</p>
                 </div>
             )}
 

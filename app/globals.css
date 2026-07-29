@@ -7,6 +7,7 @@
 :root {
   --font-arabic: 'Tajawal', 'Cairo', sans-serif;
   --font-latin: 'Inter', sans-serif;
+  --font-inter: 'Inter', sans-serif;
   --color-primary: #F57C00;
   --color-primary-hover: #EF6C00;
   --color-bg: #FAFAFA;
@@ -73,12 +74,91 @@ body {
 
 /* Card hover animation */
 .card-hover-effect {
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-hover-effect:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12);
+}
+
+/* Image loading blur placeholder */
+.img-loading {
+  filter: blur(20px);
+  transform: scale(1.1);
+  transition: all 0.5s ease-out;
+}
+
+.img-loaded {
+  filter: blur(0);
+  transform: scale(1);
+}
+
+/* Shimmer loading animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Page transition */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: fadeSlideUp 0.4s ease-out;
+}
+
+/* Scale on tap for buttons */
+.btn-tap {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-tap:active {
+  transform: scale(0.95);
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-card-dark {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Number counter animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.count-animate {
+  animation: countUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Brand glow shadow */
+.shadow-orange-glow {
+  box-shadow: 0 4px 20px rgba(245, 124, 0, 0.25);
+}
+
+.shadow-orange-glow:hover {
+  box-shadow: 0 6px 30px rgba(245, 124, 0, 0.35);
 }
 
 /* ─── Cooking Background Floating Animations ─────────────────────────── */

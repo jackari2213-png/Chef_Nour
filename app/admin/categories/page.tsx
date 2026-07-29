@@ -18,8 +18,10 @@ import {
 import { useApp } from '@/lib/store';
 import { Category } from '@/types';
 import { compressImageFile } from '@/lib/imageUtils';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function AdminCategoriesPage() {
+    const { t } = useTranslation();
     const { categories, recipes, addCategory, updateCategory, deleteCategory } = useApp();
     const [search, setSearch] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -84,7 +86,7 @@ export default function AdminCategoriesPage() {
                     slug: autoSlug,
                     image_url: imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80',
                 });
-                setSuccessMessage(`تم تحديث تصنيف "${nameAr}" بنجاح!`);
+                setSuccessMessage(t('admin.categoryUpdated', { name: nameAr }));
             } else {
                 await addCategory({
                     name_ar: nameAr,
@@ -93,14 +95,14 @@ export default function AdminCategoriesPage() {
                     slug: autoSlug,
                     image_url: imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80',
                 });
-                setSuccessMessage(`تم إضافة تصنيف "${nameAr}" جديد بنجax!`);
+                setSuccessMessage(t('admin.categoryAdded', { name: nameAr }));
             }
 
             setIsAddModalOpen(false);
             resetForm();
             setTimeout(() => setSuccessMessage(''), 4000);
         } catch (err) {
-            alert('حدث خطأ أثناء حفظ التصنيف.');
+            alert(t('admin.categorySaveError'));
         } finally {
             setIsSubmitting(false);
         }
@@ -114,9 +116,9 @@ export default function AdminCategoriesPage() {
                 <div>
                     <h1 className="text-2xl font-black text-white flex items-center gap-2">
                         <Grid className="w-6 h-6 text-brand-500" />
-                        إدارة تصنيفات الوصفات
+                        {t('admin.categories')}
                     </h1>
-                    <p className="text-xs text-gray-400 font-medium">إضافة، تعديل، وحذف تصنيفات المأكولات المعروضة في الشيف نور</p>
+                    <p className="text-xs text-gray-400 font-medium">{t('admin.categoriesSubtitle')}</p>
                 </div>
 
                 <button
@@ -124,7 +126,7 @@ export default function AdminCategoriesPage() {
                     className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-extrabold px-5 py-2.5 rounded-xl shadow-orange-glow transition-all flex items-center gap-2 shrink-0"
                 >
                     <Plus className="w-4 h-4" />
-                    <span>إضافة تصنيف جديد</span>
+                    <span>{t('admin.addCategory')}</span>
                 </button>
             </div>
 
@@ -140,7 +142,7 @@ export default function AdminCategoriesPage() {
             <div className="relative max-w-md">
                 <input
                     type="text"
-                    placeholder="البحث في التصنيفات..."
+                    placeholder={t('admin.searchPlaceholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full bg-gray-900 border border-gray-800 rounded-xl py-2.5 pr-4 pl-10 text-xs text-white focus:outline-none focus:border-brand-500"
@@ -168,7 +170,7 @@ export default function AdminCategoriesPage() {
                                     <p className="text-[11px] text-gray-400 font-mono">/{cat.slug}</p>
                                     <div className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-brand-400 bg-brand-950/60 px-2 py-0.5 rounded-full border border-brand-900">
                                         <Utensils className="w-3 h-3" />
-                                        <span>{count} وصفات</span>
+                                        <span>{t('admin.recipeCount', { count })}</span>
                                     </div>
                                 </div>
                             </div>
@@ -179,18 +181,18 @@ export default function AdminCategoriesPage() {
                                     className="p-2 text-amber-400 hover:text-white bg-amber-950/60 hover:bg-amber-600 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"
                                 >
                                     <Edit className="w-3.5 h-3.5" />
-                                    <span>تعديل</span>
+                                    <span>{t('admin.edit')}</span>
                                 </button>
                                 <button
                                     onClick={() => {
-                                        if (confirm(`هل أنت تأكد من حذف تصنيف "${cat.name_ar}"؟`)) {
+                                        if (confirm(t('admin.confirmDeleteCategory', { name: cat.name_ar }))) {
                                             deleteCategory(cat.id);
                                         }
                                     }}
                                     className="p-2 text-red-400 hover:text-white bg-red-950/60 hover:bg-red-600 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
-                                    <span>حذف</span>
+                                    <span>{t('admin.delete')}</span>
                                 </button>
                             </div>
                         </div>
@@ -205,7 +207,7 @@ export default function AdminCategoriesPage() {
                         <div className="flex items-center justify-between border-b border-gray-800 pb-3">
                             <h3 className="text-lg font-black text-white flex items-center gap-2">
                                 {editingCategory ? <Edit className="w-5 h-5 text-amber-400" /> : <Plus className="w-5 h-5 text-brand-500" />}
-                                {editingCategory ? `تعديل تصنيف: ${editingCategory.name_ar}` : 'إضافة تصنيف جديد'}
+                                {editingCategory ? t('admin.editCategory', { name: editingCategory.name_ar }) : t('admin.addCategory')}
                             </h3>
                             <button
                                 onClick={() => { setIsAddModalOpen(false); resetForm(); }}
@@ -217,11 +219,11 @@ export default function AdminCategoriesPage() {
 
                         <form onSubmit={handleSave} className="space-y-4 text-right">
                             <div>
-                                <label className="text-xs font-bold text-gray-400 block mb-1.5">اسم التصنيف (بالعربية) *</label>
+                                <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.categoryName')} *</label>
                                 <input
                                     type="text"
                                     required
-                                    placeholder="مثال: حلويات مغربية، أطباق رمضانية"
+                                    placeholder={t('admin.categoryNamePlaceholder')}
                                     value={nameAr}
                                     onChange={e => setNameAr(e.target.value)}
                                     className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500"
@@ -229,10 +231,10 @@ export default function AdminCategoriesPage() {
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold text-gray-400 block mb-1.5">الرابط الفرعي (Slug)</label>
+                                <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.slug')}</label>
                                 <input
                                     type="text"
-                                    placeholder="مثال: sweets, main-dishes (اختياري)"
+                                    placeholder={t('admin.slugPlaceholder')}
                                     value={slug}
                                     onChange={e => setSlug(e.target.value)}
                                     className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500 font-mono"
@@ -243,19 +245,19 @@ export default function AdminCategoriesPage() {
                             <div className="space-y-2 bg-gray-950 p-3.5 rounded-2xl border border-gray-800">
                                 <label className="text-xs font-bold text-white flex items-center gap-2">
                                     <ImageIcon className="w-4 h-4 text-brand-500" />
-                                    صورة التصنيف
+                                    {t('admin.categoryImage')}
                                 </label>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
-                                        placeholder="رابط صورة مباشر..."
+                                        placeholder={t('admin.imageUrlPlaceholder')}
                                         value={imageUrl.startsWith('data:') ? '📷 صورة مرفوعة مضغوطة' : imageUrl}
                                         onChange={e => setImageUrl(e.target.value)}
                                         className="flex-1 bg-gray-900 border border-gray-700 rounded-xl p-2 text-xs text-white"
                                     />
                                     <label className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1 shrink-0">
                                         <Upload className="w-3.5 h-3.5" />
-                                        <span>رفع من الجهاز</span>
+                                        <span>{t('admin.uploadFromDevice')}</span>
                                         <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                                     </label>
                                 </div>
@@ -274,7 +276,7 @@ export default function AdminCategoriesPage() {
                                     onClick={() => { setIsAddModalOpen(false); resetForm(); }}
                                     className="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-700 text-white"
                                 >
-                                    إلغاء
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -282,7 +284,7 @@ export default function AdminCategoriesPage() {
                                     className="px-5 py-2 rounded-xl text-xs font-black bg-brand-500 hover:bg-brand-600 text-white shadow-orange-glow flex items-center gap-2"
                                 >
                                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                    <span>حفظ التصنيف</span>
+                                    <span>{t('common.save')}</span>
                                 </button>
                             </div>
                         </form>

@@ -1,34 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
     ChefHat,
     Search,
-    BookOpen,
     Heart,
     User,
     Menu,
     X,
     ChevronDown,
-    Globe,
     LogOut,
-    ShoppingBag,
-    Flame,
-    Utensils
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { MOCK_CATEGORIES } from '@/lib/mock-data';
+import { useTranslation } from '@/lib/useTranslation';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
-    const { language, setLanguage, user, logout, favorites, searchQuery, setSearchQuery, categories, recipes } = useApp();
+    const { t, getLocalizedField } = useTranslation();
+    const { user, logout, favorites, searchQuery, setSearchQuery, categories, recipes } = useApp();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [announcementDismissed, setAnnouncementDismissed] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     // List categories (live categories or fallback)
     const categoryList = categories.length > 0 ? categories : MOCK_CATEGORIES;
@@ -53,16 +59,25 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-40 w-full transition-all">
-            {/* Top Announcement Banner - Cleanforms style */}
-            <div className="bg-brand-500 text-white text-[11px] sm:text-xs font-bold py-2 px-4 text-center tracking-wide flex items-center justify-center gap-2">
-                <span>📖 كتب وصفات الشيف نور الرقمية — قريباً جداً</span>
-                <span className="opacity-40">|</span>
-                <span className="hidden sm:inline">وصفات مجربة وناجحة 100% بمقادير مضبوطة</span>
-            </div>
+        <header className={`sticky top-0 z-40 w-full transition-all duration-300 ${scrolled ? 'shadow-lg' : ''}`}>
+            {/* Top Announcement Banner — Dismissible */}
+            {!announcementDismissed && (
+                <div className="bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-white text-[11px] sm:text-xs font-bold py-2 px-4 text-center tracking-wide flex items-center justify-center gap-2 relative">
+                    <span>📖 {t('nav.recipeStore')} — {t('common.comingSoon')}</span>
+                    <span className="opacity-40 hidden sm:inline">|</span>
+                    <span className="hidden sm:inline">{t('footer.featureTested')} 100%</span>
+                    <button
+                        onClick={() => setAnnouncementDismissed(true)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-white/60 hover:text-white transition-colors"
+                        aria-label="Dismiss"
+                    >
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            )}
 
             {/* Main Clean Header Bar */}
-            <div className="bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
+            <div className={`transition-all duration-300 border-b ${scrolled ? 'bg-white/90 backdrop-blur-xl border-gray-200/70 shadow-sm' : 'bg-white/95 backdrop-blur-md border-gray-100 shadow-xs'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16 sm:h-20">
 
@@ -73,21 +88,21 @@ export default function Header() {
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-black text-xl sm:text-2xl tracking-tight text-gray-900 leading-none">
-                                    الشيف نور
+                                    {t('common.chefNour')}
                                 </span>
                                 <span className="text-[10px] font-bold text-brand-600 tracking-wider">
-                                    CHEF NOUR®
+                                    {t('common.chefNourBrand')}
                                 </span>
                             </div>
                         </Link>
 
-                        {/* Centered Desktop Navigation Links - CLEANFORMS style */}
+                        {/* Centered Desktop Navigation Links */}
                         <nav className="hidden lg:flex items-center gap-8 mx-auto">
                             <Link
                                 href="/"
                                 className={`text-sm font-bold transition-colors ${pathname === '/' ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                             >
-                                الرئيسية
+                                {t('nav.home')}
                             </Link>
 
                             {/* Recipe Categories Dropdown */}
@@ -100,14 +115,14 @@ export default function Header() {
                                     href="/recipes"
                                     className={`text-sm font-bold flex items-center gap-1 transition-colors ${pathname.startsWith('/recipes') ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                                 >
-                                    <span>الوصفات</span>
+                                    <span>{t('nav.recipes')}</span>
                                     <ChevronDown className="w-3.5 h-3.5 opacity-60" />
                                 </Link>
 
                                 {categoryDropdownOpen && (
                                     <div className="absolute top-full right-0 w-60 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                                         <div className="px-4 py-1 text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
-                                            التصنيفات
+                                            {t('nav.categories')}
                                         </div>
                                         {categoryList.map((cat) => (
                                             <Link
@@ -116,7 +131,7 @@ export default function Header() {
                                                 className="flex items-center justify-between px-4 py-2 text-xs font-bold text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors"
                                                 onClick={() => setCategoryDropdownOpen(false)}
                                             >
-                                                <span>{cat.name_ar}</span>
+                                                <span>{getLocalizedField(cat, 'name')}</span>
                                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-semibold">
                                                     {getCategoryCount(cat.id, cat.name_ar)}
                                                 </span>
@@ -130,9 +145,9 @@ export default function Header() {
                                 href="/store"
                                 className={`text-sm font-bold flex items-center gap-1.5 transition-colors ${pathname.startsWith('/store') ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                             >
-                                <span>متجر الكتب</span>
+                                <span>{t('nav.recipeStore')}</span>
                                 <span className="px-2 py-0.5 text-[9px] font-black bg-amber-100 text-amber-800 rounded-full">
-                                    قريباً
+                                    {t('common.comingSoon')}
                                 </span>
                             </Link>
 
@@ -140,18 +155,21 @@ export default function Header() {
                                 href="/contact"
                                 className={`text-sm font-bold transition-colors ${pathname === '/contact' ? 'text-brand-600 underline underline-offset-8 decoration-2' : 'text-gray-700 hover:text-brand-600'}`}
                             >
-                                تواصل معنا
+                                {t('nav.contact')}
                             </Link>
                         </nav>
 
-                        {/* Right Action Icons - Clean Minimal Outline Icons */}
-                        <div className="flex items-center gap-3">
+                        {/* Right Action Icons */}
+                        <div className="flex items-center gap-1 sm:gap-2">
+                            {/* Language Switcher */}
+                            <LanguageSwitcher compact />
+
                             {/* Search */}
                             <button
                                 onClick={() => setIsSearchOpen(true)}
                                 className="p-2 text-gray-700 hover:text-brand-600 transition-colors"
-                                aria-label="بحث"
-                                title="بحث عن وصفة"
+                                aria-label={t('nav.ariaSearch')}
+                                title={t('nav.searchRecipe')}
                             >
                                 <Search className="w-5 h-5" />
                             </button>
@@ -160,7 +178,7 @@ export default function Header() {
                             <Link
                                 href="/favorites"
                                 className="relative p-2 text-gray-700 hover:text-red-500 transition-colors"
-                                title="المفضلة"
+                                title={t('nav.favoritesCount')}
                             >
                                 <Heart className="w-5 h-5" />
                                 {favorites.length > 0 && (
@@ -187,7 +205,7 @@ export default function Header() {
                                     <Link
                                         href="/login"
                                         className="p-2 text-gray-700 hover:text-brand-600 transition-colors"
-                                        title="حسابي"
+                                        title={t('nav.myAccount')}
                                     >
                                         <User className="w-5 h-5" />
                                     </Link>
@@ -198,7 +216,7 @@ export default function Header() {
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 className="lg:hidden p-2 text-gray-700 hover:text-brand-600 transition-colors"
-                                aria-label="القائمة"
+                                aria-label={t('nav.ariaMenu')}
                             >
                                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
@@ -221,13 +239,13 @@ export default function Header() {
 
                         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <Search className="w-5 h-5 text-brand-500" />
-                            عن أي وصفة تبحثين اليوم؟
+                            {t('nav.searchTitle')}
                         </h3>
 
                         <form onSubmit={handleSearchSubmit} className="relative mb-6">
                             <input
                                 type="text"
-                                placeholder="ابحثي عن وصفة، مكون (مثل: دجاج، لوز، كيك)..."
+                                placeholder={t('nav.searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 autoFocus
@@ -237,11 +255,11 @@ export default function Header() {
                                 type="submit"
                                 className="absolute left-3 top-1/2 -translate-y-1/2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all"
                             >
-                                بحث
+                                {t('common.search')}
                             </button>
                         </form>
 
-                        <div className="text-xs font-bold text-gray-400 mb-3">أكثر البحث تداولاً:</div>
+                        <div className="text-xs font-bold text-gray-400 mb-3">{t('nav.trending')}</div>
                         <div className="flex flex-wrap gap-2">
                             {['طاجين الدجاج', 'كعكة الشوكولاتة', 'بريوات', 'كسكس', 'شباكية العيد', 'حريرة رمضانية'].map((tag) => (
                                 <button
@@ -263,19 +281,19 @@ export default function Header() {
             )}
 
             {/* Mobile Navigation Drawer Sheet */}
-            {mobileMenuOpen && (
-                <div className="lg:hidden fixed inset-0 top-20 bg-white z-40 overflow-y-auto p-6 animate-in slide-in-from-top-4 duration-300">
+            <div className={`lg:hidden fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setMobileMenuOpen(false)}>
+                <div className={`fixed top-20 left-0 right-0 bg-white z-50 overflow-y-auto p-6 transition-all duration-300 ease-out shadow-2xl ${mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`} style={{ maxHeight: 'calc(100vh - 5rem)' }}>
                     <div className="flex flex-col gap-4">
                         <Link
                             href="/"
                             onClick={() => setMobileMenuOpen(false)}
                             className="text-lg font-bold text-gray-900 py-2 border-b border-gray-100"
                         >
-                            الرئيسية
+                            {t('nav.home')}
                         </Link>
 
                         <div className="py-2 border-b border-gray-100">
-                            <span className="text-xs font-bold text-gray-400 block mb-2">تصفح الوصفات حسب الفئة:</span>
+                            <span className="text-xs font-bold text-gray-400 block mb-2">{t('nav.browseCategories')}</span>
                             <div className="grid grid-cols-2 gap-2">
                                 {categoryList.map(cat => (
                                     <Link
@@ -284,7 +302,7 @@ export default function Header() {
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="p-2.5 rounded-xl bg-gray-50 text-xs font-bold text-gray-800 hover:bg-brand-50 hover:text-brand-600 transition-colors flex items-center justify-between"
                                     >
-                                        <span>{cat.name_ar}</span>
+                                        <span>{getLocalizedField(cat, 'name')}</span>
                                         <span className="text-[10px] text-gray-400 bg-white px-1.5 py-0.5 rounded-full">
                                             {getCategoryCount(cat.id, cat.name_ar)}
                                         </span>
@@ -298,8 +316,8 @@ export default function Header() {
                             onClick={() => setMobileMenuOpen(false)}
                             className="text-lg font-bold text-brand-600 py-2 border-b border-gray-100 flex items-center justify-between"
                         >
-                            <span>متجر الكتب الرقمية</span>
-                            <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-extrabold">قريباً</span>
+                            <span>{t('nav.digitalStore')}</span>
+                            <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-extrabold">{t('common.comingSoon')}</span>
                         </Link>
 
                         <Link
@@ -307,7 +325,7 @@ export default function Header() {
                             onClick={() => setMobileMenuOpen(false)}
                             className="text-lg font-bold text-gray-900 py-2 border-b border-gray-100 flex items-center justify-between"
                         >
-                            <span>وصفاتي المفضلة</span>
+                            <span>{t('nav.favorites')}</span>
                             <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">{favorites.length}</span>
                         </Link>
 
@@ -316,7 +334,7 @@ export default function Header() {
                             onClick={() => setMobileMenuOpen(false)}
                             className="text-lg font-bold text-gray-900 py-2 border-b border-gray-100"
                         >
-                            تواصل معنا
+                            {t('nav.contact')}
                         </Link>
 
                         {user?.role === 'admin' && (
@@ -326,21 +344,17 @@ export default function Header() {
                                 className="text-lg font-extrabold text-brand-600 bg-brand-50 p-3 rounded-2xl flex items-center gap-2"
                             >
                                 <ChefHat className="w-5 h-5" />
-                                لوحة تحكم الأدمن
+                                {t('nav.adminPanel')}
                             </Link>
                         )}
 
                         <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                            <span className="text-xs font-bold text-gray-500">اللغة:</span>
-                            <div className="flex gap-2">
-                                <button onClick={() => setLanguage('ar')} className={`px-3 py-1 rounded-xl text-xs font-bold ${language === 'ar' ? 'bg-brand-500 text-white' : 'bg-gray-100'}`}>العربية</button>
-                                <button onClick={() => setLanguage('fr')} className={`px-3 py-1 rounded-xl text-xs font-bold ${language === 'fr' ? 'bg-brand-500 text-white' : 'bg-gray-100'}`}>Français</button>
-                                <button onClick={() => setLanguage('en')} className={`px-3 py-1 rounded-xl text-xs font-bold ${language === 'en' ? 'bg-brand-500 text-white' : 'bg-gray-100'}`}>English</button>
-                            </div>
+                            <span className="text-xs font-bold text-gray-500">{t('nav.language')}</span>
+                            <LanguageSwitcher compact />
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
         </header>
     );
 }

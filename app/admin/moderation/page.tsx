@@ -3,15 +3,17 @@
 import React from 'react';
 import { MessageSquare, Check, X, Star } from 'lucide-react';
 import { useApp } from '@/lib/store';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function AdminModerationPage() {
+    const { t, getLocalizedField } = useTranslation();
     const { reviews, approveReview, rejectReview } = useApp();
 
     return (
         <div className="space-y-6 text-right">
             <div className="border-b border-gray-800 pb-4">
-                <h1 className="text-2xl font-black text-white">إدارة وإشراف التعليقات والصور (Moderation)</h1>
-                <p className="text-xs text-gray-400 font-medium">مراجعة وتفعيل آراء المتابعين وتطبيقات الصور قبل النشر العام</p>
+                <h1 className="text-2xl font-black text-white">{t('admin.moderationQueue')}</h1>
+                <p className="text-xs text-gray-400 font-medium">{t('admin.moderationQueue')}</p>
             </div>
 
             <div className="space-y-4">
@@ -28,7 +30,7 @@ export default function AdminModerationPage() {
 
                             <div className="flex items-center gap-3">
                                 <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${rev.moderation_status === 'approved' ? 'bg-emerald-950 text-emerald-400 border-emerald-800' : 'bg-amber-950 text-amber-400 border-amber-800'}`}>
-                                    {rev.moderation_status === 'approved' ? 'مفعل ومنشور' : 'في الانتظار'}
+                                    {rev.moderation_status === 'approved' ? t('comments.approved') : t('comments.pending')}
                                 </span>
 
                                 {rev.moderation_status === 'pending' && (
@@ -38,14 +40,14 @@ export default function AdminModerationPage() {
                                             className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-colors flex items-center gap-1"
                                         >
                                             <Check className="w-4 h-4" />
-                                            <span>موافقة ونشر</span>
+                                            <span>{t('admin.approve')}</span>
                                         </button>
                                         <button
                                             onClick={() => rejectReview(rev.id)}
                                             className="bg-red-950 text-red-400 hover:bg-red-600 hover:text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-colors flex items-center gap-1"
                                         >
                                             <X className="w-4 h-4" />
-                                            <span>رفض</span>
+                                            <span>{t('admin.reject')}</span>
                                         </button>
                                     </div>
                                 )}
@@ -58,7 +60,7 @@ export default function AdminModerationPage() {
 
                         {rev.photo_url && (
                             <div className="flex items-center gap-3">
-                                <span className="text-xs text-gray-400 font-bold">صورة تطبيق المتابعة:</span>
+                                <span className="text-xs text-gray-400 font-bold">{t('admin.followerPhoto')}:</span>
                                 <img src={rev.photo_url} alt="تطبيق" className="w-24 h-24 rounded-2xl object-cover border border-gray-800 shadow-md" />
                             </div>
                         )}

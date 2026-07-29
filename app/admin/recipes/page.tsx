@@ -18,11 +18,13 @@ import {
 import { useApp } from '@/lib/store';
 import { Recipe } from '@/types';
 import { compressImageFile } from '@/lib/imageUtils';
+import { useTranslation } from '@/lib/useTranslation';
 
 interface IngredientRow { id: string; item_ar: string; amount: string; }
 interface StepRow { id: string; step_number: number; instruction_ar: string; image_url?: string; }
 
 export default function AdminRecipesPage() {
+    const { t } = useTranslation();
     const { recipes, deleteRecipe, updateRecipe, categories } = useApp();
     const [search, setSearch] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -112,11 +114,11 @@ export default function AdminRecipesPage() {
                 steps: steps.filter(s => s.instruction_ar.trim()),
             });
 
-            setSuccessMessage(`تم تحديث الوصفة "${title}" بنجاح!`);
+            setSuccessMessage(t('admin.recipeUpdated', { title }));
             setEditingRecipe(null);
             setTimeout(() => setSuccessMessage(''), 4000);
         } catch (err) {
-            alert('حدث خطأ أثناء حفظ التعديلات.');
+            alert(t('admin.saveError'));
         } finally {
             setIsSaving(false);
         }
@@ -127,8 +129,8 @@ export default function AdminRecipesPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-gray-800 pb-4">
                 <div>
-                    <h1 className="text-2xl font-black text-white">إدارة الوصفات (CMS)</h1>
-                    <p className="text-xs text-gray-400 font-medium">عرض، تعديل، وحذف الوصفات المنشورة في المنصة</p>
+                    <h1 className="text-2xl font-black text-white">{t('admin.recipes')}</h1>
+                    <p className="text-xs text-gray-400 font-medium">{t('admin.recipesSubtitle')}</p>
                 </div>
 
                 <Link
@@ -136,7 +138,7 @@ export default function AdminRecipesPage() {
                     className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-extrabold px-5 py-2.5 rounded-xl shadow-orange-glow transition-all flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
-                    <span>إضافة وصفة جديدة</span>
+                    <span>{t('admin.addRecipe')}</span>
                 </Link>
             </div>
 
@@ -152,7 +154,7 @@ export default function AdminRecipesPage() {
             <div className="relative max-w-md">
                 <input
                     type="text"
-                    placeholder="البحث باسم الوصفة أو القسم..."
+                    placeholder={t('admin.searchPlaceholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full bg-gray-900 border border-gray-800 rounded-xl py-2.5 pr-4 pl-10 text-xs text-white focus:outline-none focus:border-brand-500"
@@ -166,14 +168,14 @@ export default function AdminRecipesPage() {
                     <table className="w-full text-right text-xs">
                         <thead className="bg-gray-950 text-gray-400 font-extrabold border-b border-gray-800">
                             <tr>
-                                <th className="p-4">الوصفة</th>
-                                <th className="p-4">الفئة</th>
-                                <th className="p-4">الصعوبة</th>
-                                <th className="p-4">وقت الطبخ</th>
-                                <th className="p-4">المشاهدات</th>
-                                <th className="p-4">التقييم</th>
-                                <th className="p-4">الحالة</th>
-                                <th className="p-4 text-center">الإجراءات</th>
+                                <th className="p-4">{t('admin.titleAr')}</th>
+                                <th className="p-4">{t('admin.category')}</th>
+                                <th className="p-4">{t('admin.difficulty')}</th>
+                                <th className="p-4">{t('admin.cookTime')}</th>
+                                <th className="p-4">{t('admin.views')}</th>
+                                <th className="p-4">{t('admin.rating')}</th>
+                                <th className="p-4">{t('admin.status')}</th>
+                                <th className="p-4 text-center">{t('admin.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-800 text-gray-300">
@@ -186,17 +188,17 @@ export default function AdminRecipesPage() {
                                     <td className="p-4 font-semibold">{r.category_name_ar}</td>
                                     <td className="p-4">
                                         <span className="bg-gray-800 px-2.5 py-1 rounded-lg text-[10px] font-bold">
-                                            {r.difficulty === 'easy' ? 'سهل' : r.difficulty === 'medium' ? 'متوسط' : 'صعب'}
+                                            {r.difficulty === 'easy' ? t('admin.easy') : r.difficulty === 'medium' ? t('admin.medium') : t('admin.hard')}
                                         </span>
                                     </td>
-                                    <td className="p-4 font-semibold">{r.cook_time_minutes} دقيقة</td>
+                                    <td className="p-4 font-semibold">{r.cook_time_minutes} {t('admin.minute')}</td>
                                     <td className="p-4 font-semibold text-brand-400">
                                         {r.views_count >= 1000 ? (r.views_count / 1000).toFixed(1) + 'K' : r.views_count.toString()}
                                     </td>
                                     <td className="p-4 font-bold text-amber-400">⭐ {r.rating_avg.toFixed(1)}</td>
                                     <td className="p-4">
                                         <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-800">
-                                            <CheckCircle2 className="w-3 h-3" /> منشور
+                                            <CheckCircle2 className="w-3 h-3" /> {t('admin.published')}
                                         </span>
                                     </td>
                                     <td className="p-4">
@@ -205,25 +207,25 @@ export default function AdminRecipesPage() {
                                                 href={`/recipes/${r.slug}`}
                                                 target="_blank"
                                                 className="p-2 text-gray-400 hover:text-white bg-gray-800 rounded-lg"
-                                                title="معاينة"
+                                                title={t('admin.preview')}
                                             >
                                                 <Eye className="w-4 h-4" />
                                             </Link>
                                             <button
                                                 onClick={() => handleOpenEditModal(r)}
                                                 className="p-2 text-amber-400 hover:text-white bg-amber-950/60 hover:bg-amber-600 rounded-lg transition-colors"
-                                                title="تعديل الوصفة"
+                                                title={t('admin.edit')}
                                             >
                                                 <Edit className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => {
-                                                    if (confirm(`هل أنت تأكد من حذف وصفة "${r.title_ar}"؟`)) {
+                                                    if (confirm(t('admin.confirmDelete', { title: r.title_ar }))) {
                                                         deleteRecipe(r.id);
                                                     }
                                                 }}
                                                 className="p-2 text-red-400 hover:text-white bg-red-950/60 hover:bg-red-600 rounded-lg transition-colors"
-                                                title="حذف"
+                                                title={t('admin.delete')}
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -243,7 +245,7 @@ export default function AdminRecipesPage() {
                         <div className="flex items-center justify-between border-b border-gray-800 pb-4">
                             <h2 className="text-xl font-black text-white flex items-center gap-2">
                                 <Edit className="w-5 h-5 text-amber-400" />
-                                تعديل الوصفة: {editingRecipe.title_ar}
+                                {t('admin.editRecipe', { title: editingRecipe.title_ar })}
                             </h2>
                             <button onClick={() => setEditingRecipe(null)} className="p-2 text-gray-400 hover:text-white">
                                 <X className="w-5 h-5" />
@@ -254,7 +256,7 @@ export default function AdminRecipesPage() {
                             {/* Title & Category */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">عنوان الوصفة *</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.recipeTitle')} *</label>
                                     <input
                                         type="text"
                                         required
@@ -264,7 +266,7 @@ export default function AdminRecipesPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">الفئة</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.category')}</label>
                                     <select
                                         value={category}
                                         onChange={e => setCategory(e.target.value)}
@@ -280,19 +282,19 @@ export default function AdminRecipesPage() {
                             {/* Difficulty, Times & Servings */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">الصعوبة</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.difficulty')}</label>
                                     <select
                                         value={difficulty}
                                         onChange={e => setDifficulty(e.target.value as any)}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none"
                                     >
-                                        <option value="easy">سهل</option>
-                                        <option value="medium">متوسط</option>
-                                        <option value="hard">صعب</option>
+                                        <option value="easy">{t('admin.easy')}</option>
+                                        <option value="medium">{t('admin.medium')}</option>
+                                        <option value="hard">{t('admin.hard')}</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">التحضير (دقيقة)</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.prepTime')}</label>
                                     <input
                                         type="number"
                                         min="1"
@@ -302,7 +304,7 @@ export default function AdminRecipesPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">الطبخ (دقيقة)</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.cookTime')}</label>
                                     <input
                                         type="number"
                                         min="1"
@@ -312,7 +314,7 @@ export default function AdminRecipesPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">عدد الأشخاص</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.servings')}</label>
                                     <input
                                         type="number"
                                         min="1"
@@ -327,10 +329,10 @@ export default function AdminRecipesPage() {
                             <div className="space-y-4 bg-gray-950 p-4 rounded-2xl border border-gray-800">
                                 <label className="text-xs font-black text-white flex items-center gap-2">
                                     <ImageIcon className="w-4 h-4 text-brand-500" />
-                                    تعديل صور الوصفة
+                                    {t('admin.editImages')}
                                 </label>
                                 <div>
-                                    <label className="text-[11px] font-bold text-gray-400 block mb-1">الصورة الرئيسية</label>
+                                    <label className="text-[11px] font-bold text-gray-400 block mb-1">{t('admin.mainImage')}</label>
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
@@ -340,17 +342,17 @@ export default function AdminRecipesPage() {
                                         />
                                         <label className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1 shrink-0">
                                             <Upload className="w-3.5 h-3.5" />
-                                            <span>رفع جديد</span>
+                                            <span>{t('admin.uploadNew')}</span>
                                             <input type="file" accept="image/*" onChange={e => handleFileUpload(e, true)} className="hidden" />
                                         </label>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="text-[11px] font-bold text-gray-400 block mb-1">إضافة صور لمعرض الوصفة</label>
+                                    <label className="text-[11px] font-bold text-gray-400 block mb-1">{t('admin.additionalImages')}</label>
                                     <label className="flex items-center justify-center p-3 border border-dashed border-gray-700 hover:border-brand-500 bg-gray-900 rounded-xl cursor-pointer text-xs font-bold text-white gap-2">
                                         <Upload className="w-4 h-4 text-brand-500" />
-                                        <span>رفع صور إضافية من الجهاز (PC أو الهاتف 📱)</span>
+                                        <span>{t('admin.uploadImages')}</span>
                                         <input type="file" accept="image/*" multiple onChange={e => handleFileUpload(e, false)} className="hidden" />
                                     </label>
                                 </div>
@@ -360,7 +362,7 @@ export default function AdminRecipesPage() {
                                     {mainImage && (
                                         <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-brand-500">
                                             <img src={mainImage} alt="main" className="w-full h-full object-cover" />
-                                            <span className="absolute bottom-0 inset-x-0 bg-brand-500 text-white text-[8px] font-black text-center">الرئيسية</span>
+                                            <span className="absolute bottom-0 inset-x-0 bg-brand-500 text-white text-[8px] font-black text-center">{t('admin.main')}</span>
                                         </div>
                                     )}
                                     {galleryImages.map((img, idx) => (
@@ -380,7 +382,7 @@ export default function AdminRecipesPage() {
 
                             {/* Description */}
                             <div>
-                                <label className="text-xs font-bold text-gray-400 block mb-1.5">الوصف المختصر *</label>
+                                <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.shortDescription')} *</label>
                                 <textarea
                                     required
                                     rows={3}
@@ -397,7 +399,7 @@ export default function AdminRecipesPage() {
                                     onClick={() => setEditingRecipe(null)}
                                     className="px-5 py-2.5 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-700 text-white"
                                 >
-                                    إلغاء
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -405,7 +407,7 @@ export default function AdminRecipesPage() {
                                     className="px-6 py-2.5 rounded-xl text-xs font-black bg-brand-500 hover:bg-brand-600 text-white shadow-orange-glow flex items-center gap-2"
                                 >
                                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                    <span>حفظ التغييرات في قاعدة البيانات</span>
+                                    <span>{t('common.save')}</span>
                                 </button>
                             </div>
                         </form>

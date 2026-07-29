@@ -25,21 +25,25 @@ import {
     Sparkles,
     Award,
     Utensils,
-    CheckCircle2
+    CheckCircle2,
+    X
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import RecipeCard from '@/components/RecipeCard';
 import CookingTimer from '@/components/CookingTimer';
 import CommentThread from '@/components/CommentThread';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
     const { recipes, isFavorite, toggleFavorite, isLoading, incrementViews } = useApp();
+    const { t, getLocalizedField } = useTranslation();
 
     const recipe = recipes.find(r => r.slug === slug);
 
     // Active gallery image state
     const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+    const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
     // Ingredients checklist state
     const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
     const [activeStep, setActiveStep] = useState<number>(0);
@@ -204,11 +208,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
             {/* 3. Recipe Main Visual & Thumbnail Gallery */}
             <div className="space-y-4">
-                <div className="relative aspect-video sm:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl bg-gray-900 group">
+                <button onClick={() => setLightboxOpen(true)} className="relative w-full aspect-video sm:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl bg-gray-900 group cursor-zoom-in">
                     <img
                         src={currentHeroImage}
-                        alt={recipe.title_ar}
+                        alt={getLocalizedField(recipe, 'title')}
                         className="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-all duration-700"
+                        loading="lazy"
                     />
                     {recipe.video_url && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xs">
@@ -216,13 +221,18 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                 href={recipe.video_url}
                                 target="_blank"
                                 rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
                                 className="w-16 h-16 sm:w-20 sm:h-20 bg-brand-500 hover:bg-brand-600 text-white rounded-full flex items-center justify-center shadow-orange-glow transition-transform hover:scale-110"
                             >
                                 <Play className="w-8 h-8 fill-current ml-1" />
                             </a>
                         </div>
                     )}
-                </div>
+                    <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5">
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span>{t('recipeCard.viewRecipe')}</span>
+                    </div>
+                </button>
 
                 {/* Dynamic Gallery Row */}
                 {galleryList.length > 1 && (
@@ -233,7 +243,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                 onClick={() => setSelectedImageIndex(idx)}
                                 className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 shadow-md ${selectedImageIndex === idx ? 'border-brand-500 scale-105 ring-4 ring-brand-500/20' : 'border-white opacity-70 hover:opacity-100 hover:scale-102'}`}
                             >
-                                <img src={imgUrl} alt={`صورة ${idx + 1}`} className="w-full h-full object-cover" />
+                                <img src={imgUrl} alt={`${getLocalizedField(recipe, 'title')} ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
                                 {selectedImageIndex === idx && (
                                     <div className="absolute inset-0 bg-brand-500/10" />
                                 )}
@@ -242,6 +252,38 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                     </div>
                 )}
             </div>
+
+            {/* Image Lightbox Modal */}
+            {lightboxOpen && (
+                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" dir="ltr" onClick={() => setLightboxOpen(false)}>
+                    <button onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 text-white/60 hover:text-white p-2 z-10">
+                        <X className="w-8 h-8" />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(prev => Math.max(0, prev - 1)); }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 disabled:opacity-30"
+                        disabled={selectedImageIndex === 0}
+                    >
+                        <ChevronLeft className="w-10 h-10" />
+                    </button>
+                    <img
+                        src={galleryList[selectedImageIndex]}
+                        alt={getLocalizedField(recipe, 'title')}
+                        className="max-w-full max-h-[85vh] object-contain rounded-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(prev => Math.min(galleryList.length - 1, prev + 1)); }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 disabled:opacity-30"
+                        disabled={selectedImageIndex === galleryList.length - 1}
+                    >
+                        <ChevronRight className="w-10 h-10" />
+                    </button>
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 text-sm font-bold">
+                        {selectedImageIndex + 1} / {galleryList.length}
+                    </div>
+                </div>
+            )}
 
             {/* 4. Metadata Badges Row matching reference design */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

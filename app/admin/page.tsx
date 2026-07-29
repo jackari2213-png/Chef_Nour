@@ -21,11 +21,13 @@ import {
 import { useApp } from '@/lib/store';
 import { MOCK_CATEGORIES } from '@/lib/mock-data';
 import { compressImageFile } from '@/lib/imageUtils';
+import { useTranslation } from '@/lib/useTranslation';
 
 interface IngredientRow { id: string; item_ar: string; amount: string; }
 interface StepRow { id: string; step_number: number; instruction_ar: string; image_url?: string; }
 
 export default function AdminDashboardPage() {
+    const { t } = useTranslation();
     const { reviews, approveReview, rejectReview, recipes, addRecipe, orders, categories } = useApp();
     const pendingReviews = reviews.filter(r => r.moderation_status === 'pending');
     const totalViews = recipes.reduce((sum, r) => sum + (r.views_count || 0), 0);
@@ -114,7 +116,7 @@ export default function AdminDashboardPage() {
         e.preventDefault();
         if (!title.trim() || !description.trim()) return;
         if (steps.some(s => !s.instruction_ar.trim())) {
-            alert('يرجى ملء جميع خطوات التحضير');
+            alert(t('admin.fillAllSteps'));
             return;
         }
 
@@ -149,11 +151,11 @@ export default function AdminDashboardPage() {
             {/* Dashboard Top Title */}
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-white">لوحة التحكم والأداء</h1>
-                    <p className="text-xs text-gray-400 font-medium">مرحباً الشيف نور، إليك ملخص الإحصائيات اليومية</p>
+                    <h1 className="text-2xl sm:text-3xl font-black text-white">{t('admin.dashboardTitle')}</h1>
+                    <p className="text-xs text-gray-400 font-medium">{t('admin.dashboardSubtitle')}</p>
                 </div>
                 <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800">
-                    النظام يعمل بكفاءة 100%
+                    {t('admin.systemStatus')}
                 </span>
             </div>
 
@@ -161,50 +163,54 @@ export default function AdminDashboardPage() {
             {recipeAdded && (
                 <div className="bg-emerald-950 text-emerald-300 p-4 rounded-2xl border border-emerald-800 text-xs font-bold flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    تم نشر الوصفة بنجاح وإضافتها للمنصة فوراً!
+                    {t('admin.recipePublished')}
                 </div>
             )}
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-brand-500/50 transition-all">
-                    <div className="flex items-center justify-between text-slate-400">
-                        <span className="text-xs font-bold">الوصفات المنشورة</span>
+                <div className="relative group bg-gradient-to-br from-slate-800 to-slate-850 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-brand-500/50 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-500/10 transition-all" />
+                    <div className="flex items-center justify-between text-slate-400 relative z-10">
+                        <span className="text-xs font-bold">{t('admin.statsTotalRecipes')}</span>
                         <Utensils className="w-5 h-5 text-brand-500" />
                     </div>
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline justify-between relative z-10">
                         <span className="text-3xl font-black text-white">{recipes.length}</span>
-                        <span className="text-xs font-bold text-emerald-400">حقيقي</span>
+                        <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full">{t('admin.real')}</span>
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-blue-500/50 transition-all">
-                    <div className="flex items-center justify-between text-slate-400">
-                        <span className="text-xs font-bold">مبيعات الكتب</span>
+                <div className="relative group bg-gradient-to-br from-slate-800 to-slate-850 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-blue-500/50 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-all" />
+                    <div className="flex items-center justify-between text-slate-400 relative z-10">
+                        <span className="text-xs font-bold">{t('admin.statsBookSales')}</span>
                         <BookOpen className="w-5 h-5 text-blue-500" />
                     </div>
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline justify-between relative z-10">
                         <span className="text-3xl font-black text-white">{orders.length}</span>
-                        <span className="text-xs font-bold text-emerald-400">حقيقي</span>
+                        <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full">{t('admin.real')}</span>
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-amber-500/50 transition-all">
-                    <div className="flex items-center justify-between text-slate-400">
-                        <span className="text-xs font-bold">تعليقات جديدة</span>
+                <div className="relative group bg-gradient-to-br from-slate-800 to-slate-850 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-amber-500/50 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-amber-500/10 transition-all" />
+                    <div className="flex items-center justify-between text-slate-400 relative z-10">
+                        <span className="text-xs font-bold">{t('admin.statsPendingReviews')}</span>
                         <MessageSquare className="w-5 h-5 text-amber-500" />
                     </div>
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline justify-between relative z-10">
                         <span className="text-3xl font-black text-white">{pendingReviews.length}</span>
-                        <span className="text-xs font-bold text-amber-400">في الانتظار</span>
+                        <span className="text-xs font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-full">{t('admin.pending')}</span>
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-purple-500/50 transition-all">
-                    <div className="flex items-center justify-between text-slate-400">
-                        <span className="text-xs font-bold">إجمالي المشاهدات</span>
+                <div className="relative group bg-gradient-to-br from-slate-800 to-slate-850 rounded-3xl p-5 border border-slate-700 space-y-3 hover:border-purple-500/50 transition-all overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-500/10 transition-all" />
+                    <div className="flex items-center justify-between text-slate-400 relative z-10">
+                        <span className="text-xs font-bold">{t('admin.statsTotalViews')}</span>
                         <Eye className="w-5 h-5 text-purple-500" />
                     </div>
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline justify-between relative z-10">
                         <span className="text-3xl font-black text-white">{totalViewsFormatted}</span>
-                        <span className="text-xs font-bold text-emerald-400">حقيقي</span>
+                        <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full">{t('admin.real')}</span>
                     </div>
                 </div>
             </div>
@@ -217,7 +223,7 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center justify-between border-b border-slate-700 pb-3">
                         <h3 className="text-lg font-black text-white flex items-center gap-2">
                             <MessageSquare className="w-5 h-5 text-brand-500" />
-                            التعليقات في انتظار الموافقة ({pendingReviews.length})
+                            {t('admin.moderationQueue')} ({pendingReviews.length})
                         </h3>
                     </div>
                     <div className="space-y-3">
@@ -234,11 +240,11 @@ export default function AdminDashboardPage() {
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
                                         <button onClick={() => approveReview(rev.id)}
-                                            className="w-9 h-9 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white flex items-center justify-center transition-colors" title="موافقة">
+                                            className="w-9 h-9 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white flex items-center justify-center transition-colors" title={t('admin.approve')}>
                                             <Check className="w-4 h-4" />
                                         </button>
                                         <button onClick={() => rejectReview(rev.id)}
-                                            className="w-9 h-9 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-400 hover:text-white flex items-center justify-center transition-colors" title="رفض">
+                                            className="w-9 h-9 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-400 hover:text-white flex items-center justify-center transition-colors" title={t('admin.reject')}>
                                             <X className="w-4 h-4" />
                                         </button>
                                     </div>
@@ -247,7 +253,7 @@ export default function AdminDashboardPage() {
                         ) : (
                             <div className="text-center py-8 bg-slate-900/40 rounded-2xl border border-slate-700/50">
                                 <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
-                                <p className="text-xs text-slate-400 font-medium">جميع التعليقات تمت مراجعتها وموافقتها بالكامل</p>
+                                <p className="text-xs text-slate-400 font-medium">{t('admin.noPendingReviews')}</p>
                             </div>
                         )}
                     </div>
@@ -258,20 +264,20 @@ export default function AdminDashboardPage() {
                     {/* Add Recipe CTA */}
                     <div className="bg-gradient-to-br from-brand-500 to-brand-700 rounded-3xl p-6 text-white space-y-3 shadow-orange-glow">
                         <ChefHat className="w-8 h-8" />
-                        <h3 className="text-lg font-black">نشر وصفة جديدة</h3>
-                        <p className="text-xs text-orange-100 font-medium">أضيفي وصفة كاملة مع المقادير والخطوات والصور</p>
+                        <h3 className="text-lg font-black">{t('admin.quickActions')}</h3>
+                        <p className="text-xs text-orange-100 font-medium">{t('admin.addQuickRecipe')}</p>
                         <button
                             onClick={() => setModalOpen(true)}
                             className="w-full bg-white text-brand-600 font-extrabold text-xs py-3 rounded-2xl hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
                         >
                             <Plus className="w-4 h-4" />
-                            <span>إضافة وصفة جديدة</span>
+                            <span>{t('admin.addRecipe')}</span>
                         </button>
                     </div>
 
                     {/* Recent Recipes list */}
                     <div className="bg-slate-800 rounded-3xl p-5 border border-slate-700 space-y-3">
-                        <h4 className="text-xs font-black text-white border-b border-slate-700 pb-2">آخر 5 وصفات منشورة</h4>
+                        <h4 className="text-xs font-black text-white border-b border-slate-700 pb-2">{t('admin.recentRecipes')}</h4>
                         {recipes.slice(0, 5).map(r => (
                             <div key={r.id} className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-slate-700/50 transition-colors">
                                 <img src={r.main_image} alt={r.title_ar} className="w-8 h-8 rounded-lg object-cover" />
@@ -279,7 +285,7 @@ export default function AdminDashboardPage() {
                                     <p className="text-xs font-bold text-slate-200 truncate">{r.title_ar}</p>
                                     <p className="text-[10px] text-slate-400">{r.category_name_ar}</p>
                                 </div>
-                                <span className="text-[10px] text-emerald-400 font-bold shrink-0">منشور</span>
+                                <span className="text-[10px] text-emerald-400 font-bold shrink-0">{t('admin.published')}</span>
                             </div>
                         ))}
                     </div>
@@ -293,9 +299,9 @@ export default function AdminDashboardPage() {
 
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-800">
-                            <h2 className="text-xl font-black text-white flex items-center gap-2">
+                                <h2 className="text-xl font-black text-white flex items-center gap-2">
                                 <ChefHat className="w-6 h-6 text-brand-500" />
-                                إضافة وصفة جديدة كاملة
+                                {t('admin.addRecipe')}
                             </h2>
                             <button onClick={() => { setModalOpen(false); resetForm(); }}
                                 className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl">
@@ -308,13 +314,13 @@ export default function AdminDashboardPage() {
                             {/* Basic Info */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="sm:col-span-2">
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">عنوان الوصفة *</label>
-                                    <input required type="text" placeholder="مثال: طاجين اللحم بالبرقوق" value={title} onChange={e => setTitle(e.target.value)}
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.recipeTitle')} *</label>
+                                    <input required type="text" placeholder={t('admin.recipeTitlePlaceholder')} value={title} onChange={e => setTitle(e.target.value)}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500" />
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">الفئة</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.category')}</label>
                                     <select value={category} onChange={e => setCategory(e.target.value)}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none">
                                         {categories.map(c => (<option key={c.id} value={c.id}>{c.name_ar}</option>))}
@@ -322,23 +328,23 @@ export default function AdminDashboardPage() {
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">مستوى الصعوبة</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.difficulty')}</label>
                                     <select value={difficulty} onChange={e => setDifficulty(e.target.value as any)}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none">
-                                        <option value="easy">سهل</option>
-                                        <option value="medium">متوسط</option>
-                                        <option value="hard">صعب</option>
+                                        <option value="easy">{t('admin.easy')}</option>
+                                        <option value="medium">{t('admin.medium')}</option>
+                                        <option value="hard">{t('admin.hard')}</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">وقت التحضير (دقيقة)</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.prepTime')}</label>
                                     <input type="number" min="1" value={prepTime} onChange={e => setPrepTime(Number(e.target.value))}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none" />
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">وقت الطبخ (دقيقة)</label>
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.cookTime')}</label>
                                     <input type="number" min="1" value={cookTime} onChange={e => setCookTime(Number(e.target.value))}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none" />
                                 </div>
@@ -348,27 +354,27 @@ export default function AdminDashboardPage() {
                                     <div className="flex items-center justify-between border-b border-gray-800 pb-2.5">
                                         <label className="text-xs font-black text-white flex items-center gap-2">
                                             <ImageIcon className="w-4 h-4 text-brand-500" />
-                                            معرض صور الوصفة (الصورة الرئيسية + الصور الإضافية)
+                                            {t('admin.imageGallery')}
                                         </label>
                                         <span className="text-[10px] bg-brand-950 text-brand-400 font-extrabold px-2.5 py-1 rounded-full border border-brand-800">
-                                            إجمالي {(mainImage ? 1 : 0) + galleryImages.length} صور
+                                            {t('admin.totalImages', { count: (mainImage ? 1 : 0) + galleryImages.length })}
                                         </span>
                                     </div>
 
                                     {/* 1. Main Cover Image Section */}
                                     <div className="space-y-1.5">
-                                        <label className="text-[11px] font-bold text-gray-300 block">الصورة الرئيسية (Cover Image)</label>
+                                        <label className="text-[11px] font-bold text-gray-300 block">{t('admin.mainImage')}</label>
                                         <div className="flex flex-col sm:flex-row items-stretch gap-2">
                                             <input
                                                 type="text"
-                                                placeholder="أدخل رابط الصورة (URL) أو ارفع ملف من جهازك..."
+                                                placeholder={t('admin.imageUrlPlaceholder')}
                                                 value={mainImage.startsWith('data:') ? '📷 صورة مرفوعة من الجهاز' : mainImage}
                                                 onChange={e => setMainImage(e.target.value)}
                                                 className="flex-1 bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
                                             />
                                             <label className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-orange-glow flex items-center justify-center gap-2 shrink-0">
                                                 <Upload className="w-4 h-4" />
-                                                <span>رفع من الحاسوب / الهاتف</span>
+                                                <span>{t('admin.uploadFromDevice')}</span>
                                                 <input
                                                     type="file"
                                                     accept="image/*"
@@ -381,13 +387,13 @@ export default function AdminDashboardPage() {
 
                                     {/* 2. Additional Gallery Images Section */}
                                     <div className="space-y-2 pt-1 border-t border-gray-850">
-                                        <label className="text-[11px] font-bold text-gray-300 block">إضافة صور فرعية لمعرض الوصفة</label>
+                                        <label className="text-[11px] font-bold text-gray-300 block">{t('admin.additionalImages')}</label>
 
                                         {/* PC / Mobile Multi-file Dropzone button */}
                                         <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-700 hover:border-brand-500 bg-gray-900/60 hover:bg-gray-900 rounded-2xl cursor-pointer transition-all group text-center">
                                             <Upload className="w-6 h-6 text-brand-500 group-hover:scale-110 transition-transform mb-1" />
-                                            <span className="text-xs font-black text-white">رفع صور من جهازك (PC أو الهاتف 📱)</span>
-                                            <span className="text-[10px] text-gray-400 mt-0.5">يمكنك تحديد صورة أو عدة صور دفعة واحدة</span>
+                                            <span className="text-xs font-black text-white">{t('admin.uploadImages')}</span>
+                                            <span className="text-[10px] text-gray-400 mt-0.5">{t('admin.uploadImagesHint')}</span>
                                             <input
                                                 type="file"
                                                 accept="image/*"
@@ -401,7 +407,7 @@ export default function AdminDashboardPage() {
                                         <div className="flex gap-2 pt-1">
                                             <input
                                                 type="url"
-                                                placeholder="أو أدخل رابط صورة عبر الانترنت (URL)..."
+                                                    placeholder={t('admin.imageUrlPlaceholder')}
                                                 value={newImageUrl}
                                                 onChange={e => setNewImageUrl(e.target.value)}
                                                 className="flex-1 bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
@@ -412,7 +418,7 @@ export default function AdminDashboardPage() {
                                                 className="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1 shrink-0 border border-gray-700"
                                             >
                                                 <Plus className="w-4 h-4" />
-                                                <span>إضافة رابط</span>
+                                                <span>{t('admin.addLink')}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -423,12 +429,12 @@ export default function AdminDashboardPage() {
                                         {mainImage ? (
                                             <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-brand-500 shadow-md group">
                                                 <img src={mainImage} alt="main" className="w-full h-full object-cover" />
-                                                <span className="absolute bottom-0 inset-x-0 bg-brand-500 text-white text-[9px] font-black text-center py-0.5">الرئيسية</span>
+                                                <span className="absolute bottom-0 inset-x-0 bg-brand-500 text-white text-[9px] font-black text-center py-0.5">{t('admin.main')}</span>
                                             </div>
                                         ) : (
                                             <div className="relative aspect-square rounded-xl overflow-hidden border border-dashed border-gray-700 bg-gray-900/50 flex flex-col items-center justify-center text-center p-1 text-gray-500">
                                                 <ImageIcon className="w-5 h-5 mb-1 text-gray-600" />
-                                                <span className="text-[9px] font-bold">بدون رئيسية</span>
+                                                <span className="text-[9px] font-bold">{t('admin.noMainImage')}</span>
                                             </div>
                                         )}
 
@@ -440,7 +446,7 @@ export default function AdminDashboardPage() {
                                                     type="button"
                                                     onClick={() => removeGalleryImage(idx)}
                                                     className="absolute top-1 right-1 bg-red-600/90 hover:bg-red-600 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    title="حذف الصورة"
+                                                    title={t('admin.deleteImage')}
                                                 >
                                                     <Trash2 className="w-3 h-3" />
                                                 </button>
@@ -453,7 +459,7 @@ export default function AdminDashboardPage() {
                                                     }}
                                                     className="absolute bottom-0 inset-x-0 bg-black/70 hover:bg-brand-600 text-white text-[8px] font-bold text-center py-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
-                                                    جعلها رئيسية
+                                                    {t('admin.makeMain')}
                                                 </button>
                                             </div>
                                         ))}
@@ -461,8 +467,8 @@ export default function AdminDashboardPage() {
                                 </div>
 
                                 <div className="sm:col-span-2">
-                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">وصف مختصر *</label>
-                                    <textarea required rows={3} placeholder="وصف شهي ومفصل للوصفة..." value={description} onChange={e => setDescription(e.target.value)}
+                                    <label className="text-xs font-bold text-gray-400 block mb-1.5">{t('admin.shortDescription')} *</label>
+                                    <textarea required rows={3} placeholder={t('admin.descriptionPlaceholder')} value={description} onChange={e => setDescription(e.target.value)}
                                         className="w-full bg-gray-950 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500" />
                                 </div>
                             </div>
@@ -470,11 +476,11 @@ export default function AdminDashboardPage() {
                             {/* Dynamic Ingredients */}
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-black text-white">المقادير ({ingredients.length})</h3>
+                                    <h3 className="text-sm font-black text-white">{t('admin.ingredients')} ({ingredients.length})</h3>
                                     <button type="button" onClick={addIngredient}
                                         className="bg-brand-500/20 hover:bg-brand-500 text-brand-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-colors">
                                         <Plus className="w-3.5 h-3.5" />
-                                        <span>إضافة مكون</span>
+                                        <span>{t('admin.addIngredient')}</span>
                                     </button>
                                 </div>
                                 <div className="space-y-2">
@@ -482,13 +488,13 @@ export default function AdminDashboardPage() {
                                         <div key={ing.id} className="flex items-center gap-2">
                                             <span className="text-xs text-gray-500 font-bold w-5 shrink-0">{idx + 1}.</span>
                                             <input
-                                                type="text" placeholder="اسم المكون"
+                                                type="text" placeholder={t('admin.ingredientName')}
                                                 value={ing.item_ar}
                                                 onChange={e => updateIngredient(ing.id, 'item_ar', e.target.value)}
                                                 className="flex-1 bg-gray-950 border border-gray-700 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-brand-500"
                                             />
                                             <input
-                                                type="text" placeholder="الكمية"
+                                                type="text" placeholder={t('admin.amount')}
                                                 value={ing.amount}
                                                 onChange={e => updateIngredient(ing.id, 'amount', e.target.value)}
                                                 className="w-28 bg-gray-950 border border-gray-700 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-brand-500"
@@ -507,18 +513,18 @@ export default function AdminDashboardPage() {
                             {/* Dynamic Steps */}
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-black text-white">طريقة التحضير ({steps.length} خطوات)</h3>
+                                    <h3 className="text-sm font-black text-white">{t('admin.instructions')} ({steps.length} {t('admin.steps')})</h3>
                                     <button type="button" onClick={addStep}
                                         className="bg-brand-500/20 hover:bg-brand-500 text-brand-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-colors">
                                         <Plus className="w-3.5 h-3.5" />
-                                        <span>إضافة خطوة</span>
+                                        <span>{t('admin.addStep')}</span>
                                     </button>
                                 </div>
                                 <div className="space-y-3">
                                     {steps.map((step, idx) => (
                                         <div key={step.id} className="bg-gray-950 rounded-2xl p-4 border border-gray-800 space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs font-extrabold text-brand-400">المرحلة {step.step_number}</span>
+                                                <span className="text-xs font-extrabold text-brand-400">{t('admin.step')} {step.step_number}</span>
                                                 {steps.length > 1 && (
                                                     <button type="button" onClick={() => removeStep(step.id)}
                                                         className="p-1 text-red-400 hover:bg-red-950 rounded-lg text-xs">
@@ -527,12 +533,12 @@ export default function AdminDashboardPage() {
                                                 )}
                                             </div>
                                             <textarea rows={2} required
-                                                placeholder={`تعليمات المرحلة ${step.step_number}...`}
+                                                placeholder={t('admin.stepInstructionPlaceholder', { number: step.step_number })}
                                                 value={step.instruction_ar}
                                                 onChange={e => updateStep(step.id, 'instruction_ar', e.target.value)}
                                                 className="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500"
                                             />
-                                            <input type="url" placeholder="رابط صورة للخطوة (اختياري)"
+                                            <input type="url" placeholder={t('admin.stepImagePlaceholder')}
                                                 value={step.image_url || ''}
                                                 onChange={e => updateStep(step.id, 'image_url', e.target.value)}
                                                 className="w-full bg-gray-900 border border-gray-700 rounded-xl py-2 px-3 text-xs text-white focus:outline-none"
@@ -546,12 +552,12 @@ export default function AdminDashboardPage() {
                             <div className="flex gap-3 pt-4 border-t border-gray-800">
                                 <button type="button" onClick={() => { setModalOpen(false); resetForm(); }}
                                     className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold text-xs py-3 rounded-xl transition-colors">
-                                    إلغاء
+                                    {t('common.cancel')}
                                 </button>
                                 <button type="submit"
                                     className="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-3 rounded-xl shadow-orange-glow transition-all flex items-center justify-center gap-2">
                                     <Plus className="w-4 h-4" />
-                                    <span>نشر الوصفة فوراً</span>
+                                    <span>{t('common.save')}</span>
                                 </button>
                             </div>
                         </form>

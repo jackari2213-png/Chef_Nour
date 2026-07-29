@@ -4,16 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import { User, Mail, ShieldCheck, Heart, ShoppingBag, LogOut, ChefHat } from 'lucide-react';
 import { useApp } from '@/lib/store';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function ProfilePage() {
     const { user, logout, favorites, orders } = useApp();
+    const { t } = useTranslation();
 
     if (!user) {
         return (
             <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-                <h2 className="text-xl font-bold text-gray-900">يجب تسجيل الدخول لمشاهدة ملفك الشخصي</h2>
+                <h2 className="text-xl font-bold text-gray-900">{t('auth.loginRequired')}</h2>
                 <Link href="/login" className="inline-block bg-brand-500 text-white font-bold text-xs px-6 py-3 rounded-xl">
-                    تسجيل الدخول
+                    {t('auth.login')}
                 </Link>
             </div>
         );
@@ -35,12 +37,12 @@ export default function ProfilePage() {
                             <h1 className="text-2xl font-black text-gray-900">{user.full_name}</h1>
                             {user.role === 'admin' && (
                                 <span className="text-[10px] font-extrabold bg-orange-100 text-brand-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <ChefHat className="w-3 h-3" /> أدمن الشيف نور
+                                    <ChefHat className="w-3 h-3" /> {t('profile.adminBadge')}
                                 </span>
                             )}
                         </div>
                         <p className="text-xs text-gray-500 font-medium">{user.email}</p>
-                        <p className="text-[11px] text-gray-400">عضوة منذ {new Date(user.created_at).toLocaleDateString('ar-MA')}</p>
+                        <p className="text-[11px] text-gray-400">{t('profile.memberSince')} {new Date(user.created_at).toLocaleDateString('ar-MA')}</p>
                     </div>
                 </div>
 
@@ -50,7 +52,7 @@ export default function ProfilePage() {
                             href="/admin"
                             className="bg-brand-500 hover:bg-brand-600 text-white text-xs font-extrabold px-5 py-3 rounded-xl shadow-orange-glow transition-all"
                         >
-                            لوحة تحكم الأدمن
+                            {t('profile.adminPanelLink')}
                         </Link>
                     )}
                     <button
@@ -58,7 +60,7 @@ export default function ProfilePage() {
                         className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-4 py-3 rounded-xl transition-colors flex items-center gap-1.5"
                     >
                         <LogOut className="w-4 h-4" />
-                        <span>خروج</span>
+                        <span>{t('profile.logout')}</span>
                     </button>
                 </div>
             </div>
@@ -75,11 +77,11 @@ export default function ProfilePage() {
                             <Heart className="w-5 h-5 fill-current" />
                         </div>
                         <div className="text-right">
-                            <span className="block font-black text-sm text-gray-900">الوصفات المحفوظة</span>
-                            <span className="text-xs text-gray-400 font-bold">{favorites.length} وصفة</span>
+                            <span className="block font-black text-sm text-gray-900">{t('profile.myFavorites')}</span>
+                            <span className="text-xs text-gray-400 font-bold">{favorites.length}</span>
                         </div>
                     </div>
-                    <span className="text-xs text-brand-600 font-bold">عرض ←</span>
+                    <span className="text-xs text-brand-600 font-bold">{t('common.viewAll')} ←</span>
                 </Link>
 
                 <Link
@@ -91,11 +93,11 @@ export default function ProfilePage() {
                             <ShoppingBag className="w-5 h-5" />
                         </div>
                         <div className="text-right">
-                            <span className="block font-black text-sm text-gray-900">الكتب الرقمية المشتراة</span>
-                            <span className="text-xs text-gray-400 font-bold">{orders.length} كتب</span>
+                            <span className="block font-black text-sm text-gray-900">{t('profile.myOrders')}</span>
+                            <span className="text-xs text-gray-400 font-bold">{orders.length}</span>
                         </div>
                     </div>
-                    <span className="text-xs text-brand-600 font-bold">عرض ←</span>
+                    <span className="text-xs text-brand-600 font-bold">{t('common.viewAll')} ←</span>
                 </Link>
 
             </div>

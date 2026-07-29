@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -19,13 +19,13 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
+import { supabaseSignIn, supabaseSignOut } from '@/lib/useAuth';
 
-// Admin email — only this email is granted admin access
 const ADMIN_EMAIL = 'nour@chefnour.com';
 
 // ─── Admin Login Gate ─────────────────────────────────────────────────────────
-function AdminLoginGate() {
-    const { login } = useApp();
+function AdminLoginGate({ onSuccess }: { onSuccess: () => void }) {
+    const { setUser, login } = useApp();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -39,30 +39,27 @@ function AdminLoginGate() {
 
         try {
             if (isSupabaseConfigured()) {
-                // ── Supabase Auth ──────────────────────────────────────
-                const { data, error: authError } = await supabase.auth.signInWithPassword({
-                    email: email.trim().toLowerCase(),
-                    password,
-                });
+                const profile = await supabaseSignIn(email.trim().toLowerCase(), password);
 
-                if (authError || !data.user) {
-                    setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-                } else if (data.user.email !== ADMIN_EMAIL) {
-                    await supabase.auth.signOut();
+                if (profile.role !== 'admin' && email.trim().toLowerCase() !== ADMIN_EMAIL) {
+                    await supabaseSignOut();
                     setError('هذا الحساب لا يمتلك صلاحيات الأدمين');
                 } else {
-                    login(email.trim().toLowerCase(), 'admin');
+                    // Force admin role for the admin email
+                    setUser({ ...profile, role: 'admin' });
+                    onSuccess();
                 }
             } else {
-                // ── Fallback (dev without Supabase) ────────────────────
+                // Fallback: no Supabase configured (dev mode)
                 if (email.trim().toLowerCase() === ADMIN_EMAIL && password === 'chefnour2024') {
                     login(email.trim().toLowerCase(), 'admin');
+                    onSuccess();
                 } else {
                     setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
                 }
             }
-        } catch (err) {
-            setError('حدث خطأ في الاتصال، حاول مرة أخرى');
+        } catch (err: any) {
+            setError(err.message || 'حدث خطأ في الاتصال، حاول مرة أخرى');
         }
 
         setLoading(false);
@@ -75,8 +72,6 @@ function AdminLoginGate() {
             style={{ background: 'radial-gradient(ellipse at 60% 20%, #431407 0%, #111827 60%, #030712 100%)' }}
         >
             <div className="w-full max-w-md space-y-8">
-
-                {/* Logo */}
                 <div className="text-center space-y-3">
                     <div className="w-16 h-16 rounded-3xl bg-brand-500 text-white flex items-center justify-center mx-auto shadow-orange-glow">
                         <ChefHat className="w-8 h-8" />
@@ -87,17 +82,12 @@ function AdminLoginGate() {
                     </div>
                 </div>
 
-                {/* Card */}
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-gray-900 border border-gray-800 rounded-3xl p-8 space-y-5 shadow-2xl"
-                >
+                <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 rounded-3xl p-8 space-y-5 shadow-2xl">
                     <div className="flex items-center gap-2 text-brand-400 text-sm font-bold">
                         <ShieldCheck className="w-4 h-4" />
                         <span>دخول مخصص للمسؤولين فقط</span>
                     </div>
 
-                    {/* Email */}
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-gray-400 block">البريد الإلكتروني</label>
                         <input
@@ -110,7 +100,6 @@ function AdminLoginGate() {
                         />
                     </div>
 
-                    {/* Password */}
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-gray-400 block">كلمة المرور</label>
                         <div className="relative">
@@ -132,14 +121,12 @@ function AdminLoginGate() {
                         </div>
                     </div>
 
-                    {/* Error */}
                     {error && (
                         <div className="bg-red-950 border border-red-800 text-red-400 text-xs font-bold px-4 py-2.5 rounded-xl">
                             {error}
                         </div>
                     )}
 
-                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={loading}
@@ -147,7 +134,7 @@ function AdminLoginGate() {
                     >
                         {loading ? (
                             <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364-6.364l-2.121 2.121M8.757 15.243l-2.121 2.121M17.657 17.657l-2.121-2.121M8.757 8.757L6.636 6.636" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v3m0 12v3m9-9h-3M6 12H3" />
                             </svg>
                         ) : (
                             <Lock className="w-4 h-4" />
@@ -169,11 +156,38 @@ function AdminLoginGate() {
 // ─── Main Admin Layout ────────────────────────────────────────────────────────
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { user, logout } = useApp();
+    const { user, setUser, logout } = useApp();
+    const [sessionChecked, setSessionChecked] = useState(false);
+
+    // On mount: verify real Supabase session — don't trust store state alone
+    useEffect(() => {
+        const checkSession = async () => {
+            if (isSupabaseConfigured()) {
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (!session) {
+                    // No valid Supabase session → clear user state
+                    setUser(null);
+                }
+                // If session exists, onAuthStateChange in store.tsx already populated user
+            }
+            setSessionChecked(true);
+        };
+        checkSession();
+    }, [setUser]);
+
+    // Loading state while checking Supabase session
+    if (!sessionChecked) {
+        return (
+            <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     // Guard: show login screen if not authenticated as admin
     if (!user || user.role !== 'admin') {
-        return <AdminLoginGate />;
+        return <AdminLoginGate onSuccess={() => setSessionChecked(true)} />;
     }
 
     const navItems = [

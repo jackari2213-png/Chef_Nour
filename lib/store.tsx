@@ -2,8 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Recipe, Review, Order, UserProfile, Language, Product, Category } from '@/types';
-import { MOCK_RECIPES, MOCK_REVIEWS, MOCK_PRODUCTS, MOCK_USER_PROFILE, MOCK_CATEGORIES } from './mock-data';
+import { MOCK_RECIPES, MOCK_REVIEWS, MOCK_PRODUCTS, MOCK_CATEGORIES } from './mock-data';
 import { supabase, isSupabaseConfigured } from './supabase-client';
+import { resolveCurrentSession, supabaseSignOut } from './useAuth';
 
 interface AppContextType {
     language: Language;
@@ -14,8 +15,9 @@ interface AppContextType {
 
     // User Auth
     user: UserProfile | null;
-    login: (email: string, role?: 'user' | 'admin') => void;
-    logout: () => void;
+    setUser: (user: UserProfile | null) => void;  // exposed so admin login gate can set it directly
+    login: (email: string, role?: 'user' | 'admin') => void; // legacy — kept for compatibility
+    logout: () => Promise<void>;
 
     // Categories Management
     categories: Category[];
@@ -55,7 +57,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
     const [language, setLanguage] = useState<Language>('ar');
     const [favorites, setFavorites] = useState<string[]>([]);
-    const [user, setUser] = useState<UserProfile | null>(MOCK_USER_PROFILE);
+    const [user, setUser] = useState<UserProfile | null>(null);
     const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
     const [recipes, setRecipes] = useState<Recipe[]>(MOCK_RECIPES);
     const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
@@ -136,15 +138,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         try {
             const favs = localStorage.getItem('chef_nour_favs');
             if (favs) setFavorites(JSON.parse(favs));
-
-            const usr = localStorage.getItem('chef_nour_user');
-            if (usr) setUser(JSON.parse(usr));
         } catch (e) {
-            console.error('Error loading state from localStorage:', e);
+            console.error('Error loading favorites from localStorage:', e);
         }
+
+        // Restore Supabase session on mount
+        resolveCurrentSession().then(profile => {
+            if (profile) setUser(profile);
+        });
+
+        // Subscribe to auth state changes (login/logout in any tab)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (!session) {
+                setUser(null);
+            } else {
+                const profile = await resolveCurrentSession();
+                if (profile) setUser(profile);
+            }
+        });
 
         // Fetch real data from Supabase
         fetchFromSupabase();
+
+        return () => subscription.unsubscribe();
     }, [fetchFromSupabase]);
 
     // Save changes helper
@@ -168,24 +184,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const isFavorite = (recipeId: string) => favorites.includes(recipeId);
 
+    // Legacy login — kept for compatibility, used as fallback when Supabase is not configured
     const login = (email: string, role: 'user' | 'admin' = 'user') => {
         const newUser: UserProfile = {
             id: role === 'admin' ? 'usr-admin' : 'usr-' + Date.now(),
             full_name: role === 'admin' ? 'الشيف نور' : email.split('@')[0],
             email: email,
-            avatar_url: role === 'admin'
-                ? '/chef-nour.jpg'
-                : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+            avatar_url: role === 'admin' ? '/chef-nour.jpg' : undefined,
             role: role,
             created_at: new Date().toISOString(),
         };
         setUser(newUser);
-        saveToStorage('chef_nour_user', newUser);
     };
 
-    const logout = () => {
+    const logout = async () => {
+        await supabaseSignOut();
         setUser(null);
-        localStorage.removeItem('chef_nour_user');
     };
 
     // ─── Categories Management (with Supabase sync) ───────────────────────────
@@ -577,6 +591,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 toggleFavorite,
                 isFavorite,
                 user,
+                setUser,
                 login,
                 logout,
                 categories,

@@ -3,26 +3,41 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChefHat, Mail, Lock, LogIn, ArrowLeft } from 'lucide-react';
+import { ChefHat, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '@/lib/store';
+import { supabaseSignIn } from '@/lib/useAuth';
+import { isSupabaseConfigured } from '@/lib/supabase-client';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { login } = useApp();
+    const { setUser, login } = useApp();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [asAdmin, setAsAdmin] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email.trim()) return;
+        if (!email.trim() || !password) return;
+        setError('');
+        setLoading(true);
 
-        login(email, asAdmin ? 'admin' : 'user');
-        if (asAdmin) {
-            router.push('/admin');
-        } else {
-            router.push('/profile');
+        try {
+            if (isSupabaseConfigured()) {
+                const profile = await supabaseSignIn(email.trim().toLowerCase(), password);
+                setUser(profile);
+                router.push(profile.role === 'admin' ? '/admin' : '/profile');
+            } else {
+                // Fallback dev mode
+                login(email, 'user');
+                router.push('/profile');
+            }
+        } catch (err: any) {
+            setError(err.message || 'حدث خطأ، حاول مرة أخرى');
         }
+
+        setLoading(false);
     };
 
     return (
@@ -44,9 +59,9 @@ export default function LoginPage() {
                             <input
                                 type="email"
                                 required
-                                placeholder="chefnour@example.com"
+                                placeholder="your@email.com"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={e => setEmail(e.target.value)}
                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 pl-10 text-xs font-semibold focus:outline-none focus:border-brand-500"
                             />
                             <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -57,35 +72,31 @@ export default function LoginPage() {
                         <label className="text-xs font-extrabold text-gray-700 block mb-1">كلمة المرور:</label>
                         <div className="relative">
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 required
                                 placeholder="••••••••"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={e => setPassword(e.target.value)}
                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 pl-10 text-xs font-semibold focus:outline-none focus:border-brand-500"
                             />
-                            <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-1">
-                        <input
-                            type="checkbox"
-                            id="adminRole"
-                            checked={asAdmin}
-                            onChange={(e) => setAsAdmin(e.target.checked)}
-                            className="rounded text-brand-500 focus:ring-brand-500"
-                        />
-                        <label htmlFor="adminRole" className="text-xs font-bold text-gray-700 cursor-pointer">
-                            الدخول كـ مسؤول / أدمن (Chef Nour Admin)
-                        </label>
-                    </div>
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-bold px-4 py-2.5 rounded-xl">
+                            {error}
+                        </div>
+                    )}
 
                     <button
                         type="submit"
-                        className="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-orange-glow transition-all flex items-center justify-center gap-2"
+                        disabled={loading}
+                        className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-orange-glow transition-all flex items-center justify-center gap-2"
                     >
-                        <span>دخول</span>
+                        <span>{loading ? 'جاري الدخول...' : 'دخول'}</span>
                         <LogIn className="w-4 h-4" />
                     </button>
                 </form>

@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/lib/store';
 import { Review } from '@/types';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -263,11 +264,14 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
         try { return localStorage.getItem('chef_nour_guest_email') || ''; } catch { return ''; }
     });
 
-    const submitComment = (displayName: string, displayAvatar?: string) => {
+    const submitComment = async (displayName: string, displayAvatar?: string, guestUserId?: string) => {
+        const avatarUrl = displayAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=f97316`;
+
+        // Optimistic local update
         addReview({
-            user_id: user?.id || 'guest-' + Date.now(),
+            user_id: user?.id || guestUserId || '',
             user_name: displayName,
-            user_avatar: displayAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=f97316`,
+            user_avatar: avatarUrl,
             is_admin: false,
             recipe_id: recipeId,
             recipe_title_ar: recipeTitle,
@@ -275,6 +279,23 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
             comment: text.trim(),
             parent_id: null,
         });
+
+        // Persist to Supabase
+        if (isSupabaseConfigured()) {
+            await supabase.from('reviews').insert({
+                user_id: user?.id || null,   // NULL for guests — allowed by RLS
+                user_name: displayName,
+                user_avatar: avatarUrl,
+                is_admin: false,
+                recipe_id: recipeId || null,
+                recipe_title_ar: recipeTitle || null,
+                rating,
+                comment: text.trim(),
+                parent_id: null,
+                moderation_status: 'pending',
+            });
+        }
+
         setDone(true);
         setText('');
         setTimeout(() => setDone(false), 3500);

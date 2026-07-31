@@ -96,8 +96,13 @@ body {
 
 /* Shimmer loading animation */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton-shimmer {
@@ -109,8 +114,15 @@ body {
 
 /* Page transition */
 @keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-enter {
@@ -143,8 +155,15 @@ body {
 
 /* Number counter animation */
 @keyframes countUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .count-animate {
@@ -234,4 +253,51 @@ body {
 
 .cook-spin {
   animation: cookSpin 12s linear infinite;
+}
+
+/* ─── Print Styles ───────────────────────────────────────────────────────────── */
+@media print {
+
+  header,
+  footer,
+  nav,
+  .no-print,
+  button,
+  .cook-float-1,
+  .cook-float-2,
+  .cook-float-3,
+  .cook-spin {
+    display: none !important;
+  }
+
+  body,
+  html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+  }
+
+  .max-w-7xl {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  img {
+    max-height: 300px !important;
+    object-fit: cover !important;
+    page-break-inside: avoid !important;
+  }
+
+  .grid {
+    display: block !important;
+  }
+
+  .grid>* {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .page-break-before {
+    page-break-before: always !important;
+  }
 }

@@ -1,0 +1,537 @@
+'use client';
+
+import React, { useState, use, useEffect } from 'react';
+import Link from 'next/link';
+import {
+    Clock,
+    Users,
+    Flame,
+    Star,
+    Heart,
+    Share2,
+    Printer,
+    CheckSquare,
+    Square,
+    Play,
+    ChevronRight,
+    ChevronLeft,
+    Maximize2,
+    Minimize2,
+    BookOpen,
+    ChefHat,
+    Camera,
+    Send,
+    ArrowRight,
+    Sparkles,
+    Award,
+    Utensils,
+    CheckCircle2,
+    X
+} from 'lucide-react';
+import { useApp } from '@/lib/store';
+import { useToast } from '@/lib/toast';
+import type { Recipe } from '@/types';
+import RecipeCard from '@/components/RecipeCard';
+import CookingTimer from '@/components/CookingTimer';
+import CommentThread from '@/components/CommentThread';
+import { useTranslation } from '@/lib/useTranslation';
+
+export default function RecipeDetailClient({ params, initialRecipe }: { params: Promise<{ slug: string }>; initialRecipe?: Recipe | null }) {
+    const { slug } = use(params);
+    const { recipes, isFavorite, toggleFavorite, isLoading, incrementViews } = useApp();
+    const { t, getLocalizedField } = useTranslation();
+    const { success } = useToast();
+
+    const recipe = initialRecipe ?? recipes.find(r => r.slug === slug);
+
+    // Active gallery image state
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+    const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
+    // Ingredients checklist state
+    const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
+    const [activeStep, setActiveStep] = useState<number>(0);
+    // Fullscreen Cooking Mode state
+    const [cookingModeOpen, setCookingModeOpen] = useState<boolean>(false);
+    const [cookingStep, setCookingStep] = useState<number>(0);
+
+    // Increment views_count once when the recipe page is visited
+    useEffect(() => {
+        if (recipe?.id && !isLoading) {
+            incrementViews(recipe.id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [recipe?.id, isLoading]);
+
+    // Wait until recipes are loaded from Supabase
+    if (isLoading) {
+        return (
+            <div className="min-h-[70vh] flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-500 rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (!recipe) {
+        return (
+            <div className="min-h-[70vh] flex items-center justify-center pt-10 pb-12 px-4 text-center">
+                <div className="bg-white p-8 rounded-3xl max-w-sm w-full shadow-sm border border-gray-100">
+                    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Utensils className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">{t('recipeDetail.notFound')}</h2>
+                    <p className="text-sm text-gray-500 mb-6 font-medium">{t('recipeDetail.notFoundDesc')}</p>
+                    <Link href="/recipes" className="inline-flex items-center justify-center w-full bg-brand-500 text-white font-bold text-sm py-3 rounded-xl hover:bg-brand-600 transition-colors">
+                        {t('recipeDetail.browseOthers')}
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    const favorite = isFavorite(recipe.id);
+
+    // Build dynamic gallery from main_image + gallery_images + step images
+    const rawGallery = [
+        recipe.main_image,
+        ...(recipe.gallery_images || []),
+        ...recipe.steps.map(s => s.image_url).filter((url): url is string => Boolean(url))
+    ];
+    // Deduplicate
+    const galleryList = Array.from(new Set(rawGallery.filter(Boolean)));
+    const currentHeroImage = galleryList[selectedImageIndex] || recipe.main_image;
+
+    // Select all / Toggle all ingredients
+    const allChecked = recipe.ingredients.every(i => checkedIngredients[i.id]);
+
+    const toggleAllIngredients = () => {
+        if (allChecked) {
+            setCheckedIngredients({});
+        } else {
+            const next: Record<string, boolean> = {};
+            recipe.ingredients.forEach(i => { next[i.id] = true; });
+            setCheckedIngredients(next);
+        }
+    };
+
+    const handlePrint = () => {
+        window.print();
+    };
+
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: getLocalizedField(recipe, 'title'),
+                text: getLocalizedField(recipe, 'description'),
+                url: window.location.href,
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            success(t('recipeDetail.shareCopied'));
+        }
+    };
+
+    const relatedRecipes = recipes.filter(r => r.id !== recipe.id).slice(0, 3);
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+            {/* 1. Breadcrumbs */}
+            <nav className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                <Link href="/" className="hover:text-brand-600 transition-colors">{t('recipeDetail.breadcrumbHome')}</Link>
+                <span>/</span>
+                <Link href="/recipes" className="hover:text-brand-600 transition-colors">{t('recipeDetail.breadcrumbRecipes')}</Link>
+                <span>/</span>
+                <span className="text-gray-900 font-extrabold truncate max-w-[200px]">{getLocalizedField(recipe, 'title')}</span>
+            </nav>
+
+            {/* 2. Top Header & Title Section */}
+            <div className="space-y-4 text-right">
+
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <span className="inline-block bg-brand-100 text-brand-700 text-xs font-black px-3.5 py-1.5 rounded-full">
+                        {getLocalizedField(recipe, 'category_name')}
+                    </span>
+
+                    {/* Action Buttons: Print, Share, Favorite */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handlePrint}
+                            className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 px-3.5 py-2 rounded-xl text-xs font-bold border border-gray-200 shadow-sm transition-colors btn-tap"
+                        >
+                            <Printer className="w-4 h-4" />
+                            <span className="hidden sm:inline">{t('recipeDetail.print')}</span>
+                        </button>
+
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 px-3.5 py-2 rounded-xl text-xs font-bold border border-gray-200 shadow-sm transition-colors btn-tap"
+                        >
+                            <Share2 className="w-4 h-4" />
+                            <span className="hidden sm:inline">{t('recipeDetail.share')}</span>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                toggleFavorite(recipe.id);
+                                if (!isFavorite(recipe.id)) {
+                                    success(t('recipeDetail.favoriteAdded'));
+                                } else {
+                                    success(t('recipeDetail.favoriteRemoved'));
+                                }
+                            }}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm btn-tap ${favorite ? 'bg-red-500 text-white' : 'bg-white hover:bg-red-50 text-gray-700 border border-gray-200'}`}
+                        >
+                            <Heart className={`w-4 h-4 ${favorite ? 'fill-current' : ''}`} />
+                            <span>{favorite ? t('recipeDetail.saved') : t('recipeDetail.saveRecipe')}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-tight">
+                    {getLocalizedField(recipe, 'title')}
+                </h1>
+
+                {/* Rating & Author Row */}
+                <div className="flex flex-wrap items-center gap-6 text-xs text-gray-600 font-semibold pt-2">
+                    <div className="flex items-center gap-1 text-amber-500">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="font-extrabold text-gray-900 text-sm mr-1">{recipe.rating_avg.toFixed(1)}</span>
+                        <span className="text-gray-400">({recipe.rating_count.toLocaleString('ar-MA')} {t('recipeDetail.reviews')})</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 border-r border-gray-200 pr-6">
+                        <img
+                            src="/chef-nour.jpg"
+                            alt={t('common.chefNour')}
+                            className="w-6 h-6 rounded-full object-cover ring-2 ring-brand-500"
+                        />
+                        <span className="font-bold text-gray-900">{t('recipeDetail.byChef')}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-gray-500 border-r border-gray-200 pr-6">
+                        <Flame className="w-4 h-4 text-orange-500" />
+                        <span>{(recipe.views_count / 1000).toFixed(0)}K {t('recipeDetail.views')}</span>
+                    </div>
+                </div>
+
+            </div>
+
+            {/* 3. Recipe Main Visual & Thumbnail Gallery */}
+            <div className="space-y-4">
+                <div className="relative w-full aspect-video sm:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl bg-gray-900 group cursor-zoom-in">
+                    <button onClick={() => setLightboxOpen(true)} className="absolute inset-0 w-full h-full" aria-label={getLocalizedField(recipe, 'title')}>
+                        <img
+                            src={currentHeroImage}
+                            alt={getLocalizedField(recipe, 'title')}
+                            className="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-all duration-700"
+                            loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    </button>
+                    {recipe.video_url && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xs pointer-events-none">
+                            <a
+                                href={recipe.video_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="pointer-events-auto w-16 h-16 sm:w-20 sm:h-20 bg-brand-500 hover:bg-brand-600 text-white rounded-full flex items-center justify-center shadow-orange-glow transition-transform hover:scale-110"
+                            >
+                                <Play className="w-8 h-8 fill-current ml-1" />
+                            </a>
+                        </div>
+                    )}
+                    <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 pointer-events-none">
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span>{t('recipeCard.viewRecipe')}</span>
+                    </div>
+                </div>
+
+                {/* Dynamic Gallery Row */}
+                {galleryList.length > 1 && (
+                    <div className="flex items-center justify-center gap-3 overflow-x-auto py-2 max-w-2xl mx-auto scrollbar-none">
+                        {galleryList.map((imgUrl, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setSelectedImageIndex(idx)}
+                                className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 shadow-md ${selectedImageIndex === idx ? 'border-brand-500 scale-105 ring-4 ring-brand-500/20' : 'border-white opacity-70 hover:opacity-100 hover:scale-102'}`}
+                            >
+                                <img src={imgUrl} alt={`${getLocalizedField(recipe, 'title')} ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                                {selectedImageIndex === idx && (
+                                    <div className="absolute inset-0 bg-brand-500/10" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Image Lightbox Modal */}
+            {lightboxOpen && (
+                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" dir="ltr" onClick={() => setLightboxOpen(false)}>
+                    <button onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 text-white/60 hover:text-white p-2 z-10">
+                        <X className="w-8 h-8" />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(prev => Math.max(0, prev - 1)); }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 disabled:opacity-30"
+                        disabled={selectedImageIndex === 0}
+                    >
+                        <ChevronLeft className="w-10 h-10" />
+                    </button>
+                    <img
+                        src={galleryList[selectedImageIndex]}
+                        alt={getLocalizedField(recipe, 'title')}
+                        className="max-w-full max-h-[85vh] object-contain rounded-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedImageIndex(prev => Math.min(galleryList.length - 1, prev + 1)); }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 disabled:opacity-30"
+                        disabled={selectedImageIndex === galleryList.length - 1}
+                    >
+                        <ChevronRight className="w-10 h-10" />
+                    </button>
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 text-sm font-bold">
+                        {selectedImageIndex + 1} / {galleryList.length}
+                    </div>
+                </div>
+            )}
+
+            {/* 4. Metadata Badges Row matching reference design */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+                    <Clock className="w-5 h-5 text-brand-500 mx-auto mb-1" />
+                    <span className="block text-[11px] text-gray-400 font-bold">{t('recipeDetail.prepTime')}</span>
+                    <span className="text-sm font-extrabold text-gray-900">{recipe.prep_time_minutes} {t('recipeDetail.minutes')}</span>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+                    <Flame className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+                    <span className="block text-[11px] text-gray-400 font-bold">{t('recipeDetail.cookTime')}</span>
+                    <span className="text-sm font-extrabold text-gray-900">{recipe.cook_time_minutes} {t('recipeDetail.minutes')}</span>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+                    <Users className="w-5 h-5 text-blue-500 mx-auto mb-1" />
+                    <span className="block text-[11px] text-gray-400 font-bold">{t('recipeDetail.servings')}</span>
+                    <span className="text-sm font-extrabold text-gray-900">{recipe.servings} {t('recipeDetail.persons')}</span>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+                    <Award className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
+                    <span className="block text-[11px] text-gray-400 font-bold">{t('recipeDetail.difficulty')}</span>
+                    <span className="text-sm font-extrabold text-gray-900">
+                        {recipe.difficulty === 'easy' ? t('recipeDetail.easy') : recipe.difficulty === 'medium' ? t('recipeDetail.medium') : t('recipeDetail.hard')}
+                    </span>
+                </div>
+            </div>
+
+            {/* 5. Mobile Quick Jump Navigation Pills (visible only on mobile/tablet) */}
+            <div className="lg:hidden flex items-center justify-center gap-2 bg-white/90 backdrop-blur-md p-2 rounded-2xl border border-gray-200 shadow-sm sticky top-16 z-30">
+                <a href="#ingredients-section" className="flex-1 text-center bg-orange-50 hover:bg-orange-100 text-brand-700 font-extrabold text-xs py-2.5 rounded-xl border border-orange-200 transition-colors">
+                    🥕 {t('recipeDetail.ingredientsSection')} ({recipe.ingredients.length})
+                </a>
+                <a href="#steps-section" className="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold text-xs py-2.5 rounded-xl border border-gray-200 transition-colors">
+                    🍳 {t('recipeDetail.stepsSection')} ({recipe.steps.length})
+                </a>
+                <a href="#reviews-section" className="flex-1 text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs py-2.5 rounded-xl border border-emerald-200 transition-colors">
+                    💬 {t('recipeDetail.reviews')}
+                </a>
+            </div>
+
+            {/* 6. Main Split Content: Ingredients Checklist & Step-by-Step Instructions */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+
+                {/* Right Col in RTL: Interactive Ingredients Checklist */}
+                <div id="ingredients-section" className="lg:col-span-4 bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-card space-y-4 lg:sticky lg:top-28 scroll-mt-28">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                            <Utensils className="w-5 h-5 text-brand-500" />
+                            <span>{t('recipeDetail.ingredientsSection')}</span>
+                        </h3>
+
+                        <button
+                            onClick={toggleAllIngredients}
+                            className="text-xs font-bold text-brand-600 hover:underline"
+                        >
+                            {allChecked ? t('recipeDetail.unselectAll') : t('recipeDetail.selectAll')}
+                        </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                        {recipe.ingredients.map(ing => {
+                            const isChecked = !!checkedIngredients[ing.id];
+                            return (
+                                <div
+                                    key={ing.id}
+                                    onClick={() => setCheckedIngredients(prev => ({ ...prev, [ing.id]: !prev[ing.id] }))}
+                                    className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-colors border ${isChecked ? 'bg-orange-50/70 border-orange-200 text-gray-400 line-through' : 'bg-gray-50 hover:bg-gray-100 border-gray-100 text-gray-800'}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        {isChecked ? (
+                                            <CheckSquare className="w-5 h-5 text-brand-500 shrink-0" />
+                                        ) : (
+                                            <Square className="w-5 h-5 text-gray-300 shrink-0" />
+                                        )}
+                                        <span className="text-xs font-extrabold">{getLocalizedField(ing, 'item')}</span>
+                                    </div>
+                                    <span className="text-xs font-bold text-brand-600 bg-white px-2.5 py-1 rounded-xl shadow-xs">
+                                        {ing.amount}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Cooking Timer */}
+                    <CookingTimer defaultMinutes={recipe.cook_time_minutes} />
+
+                    {/* Fullscreen Cooking Mode Trigger */}
+                    <div className="pt-2">
+                        <button
+                            onClick={() => {
+                                setCookingStep(0);
+                                setCookingModeOpen(true);
+                            }}
+                            className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-extrabold text-xs sm:text-sm py-3.5 rounded-2xl shadow-orange-glow transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                        >
+                            <Maximize2 className="w-4 h-4" />
+                            <span>{t('recipeDetail.cookingMode')}</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Left Col in RTL: Step-by-Step Preparation Instructions */}
+                <div id="steps-section" className="lg:col-span-8 space-y-6 scroll-mt-28">
+                    <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+                        <h3 className="text-xl font-black text-gray-900">{t('recipeDetail.stepsSection')}</h3>
+                        <span className="text-xs font-bold text-gray-400">{recipe.steps.length} {t('recipeDetail.stepsCount')}</span>
+                    </div>
+
+                    <div className="space-y-6">
+                        {recipe.steps.map((step, idx) => (
+                            <div
+                                key={step.id}
+                                className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col sm:flex-row gap-6 items-start"
+                            >
+                                {/* Step Number Circle */}
+                                <div className="w-10 h-10 rounded-2xl bg-brand-500 text-white font-black text-base flex items-center justify-center shrink-0 shadow-md">
+                                    {step.step_number}
+                                </div>
+
+                                <div className="space-y-3 flex-1 text-right">
+                                    <p className="text-gray-800 text-sm sm:text-base leading-relaxed font-semibold">
+                                        {getLocalizedField(step, 'instruction')}
+                                    </p>
+
+                                    {step.image_url && (
+                                        <div className="rounded-2xl overflow-hidden aspect-video bg-gray-100 max-w-md border border-gray-100 shadow-xs">
+                                            <img src={step.image_url} alt={`${t('recipeDetail.stepsSection')} ${step.step_number}`} className="w-full h-full object-cover" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+            </div>
+
+            {/* 7. Community Discussion Thread */}
+            <section id="reviews-section" className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-card space-y-6 scroll-mt-28">
+                <div className="border-b border-gray-100 pb-4 text-right">
+                    <h2 className="text-2xl font-black text-gray-900 mb-1">{t('recipeDetail.communityTitle')}</h2>
+                    <p className="text-xs text-gray-500 font-medium">{t('recipeDetail.communityDesc')}</p>
+                </div>
+                <CommentThread
+                    recipeId={recipe.id}
+                    recipeTitle={getLocalizedField(recipe, 'title')}
+                    showForm={true}
+                />
+            </section>
+
+            {/* 8. Fullscreen Distraction-Free Cooking Mode Modal */}
+            {cookingModeOpen && (
+                <div className="fixed inset-0 bg-gray-950 text-white z-50 overflow-y-auto flex flex-col justify-between p-6 sm:p-12 animate-in fade-in duration-300">
+
+                    {/* Top Bar */}
+                    <div className="flex items-center justify-between border-b border-gray-800 pb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-brand-500 flex items-center justify-center font-black">
+                                {cookingStep + 1}
+                            </div>
+                            <div>
+                                <h3 className="font-extrabold text-lg sm:text-xl text-white">{getLocalizedField(recipe, 'title')}</h3>
+                                <p className="text-xs text-gray-400">{t('recipeDetail.focusMode')}</p>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setCookingModeOpen(false)}
+                            className="p-3 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl transition-colors"
+                        >
+                            <Minimize2 className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    {/* Central Cooking Instruction Big Text */}
+                    <div className="my-auto max-w-3xl mx-auto text-center space-y-8 py-8">
+                        <span className="inline-block bg-brand-500/20 text-brand-400 font-extrabold text-sm px-4 py-1.5 rounded-full border border-brand-500/30">
+                            {t('recipeDetail.stepXofY', { current: cookingStep + 1, total: recipe.steps.length })}
+                        </span>
+
+                        <p className="text-2xl sm:text-4xl font-extrabold leading-relaxed text-gray-100">
+                            {recipe.steps[cookingStep] ? getLocalizedField(recipe.steps[cookingStep], 'instruction') : ''}
+                        </p>
+
+                        {recipe.steps[cookingStep]?.image_url && (
+                            <img
+                                src={recipe.steps[cookingStep].image_url}
+                                alt={getLocalizedField(recipe, 'title')}
+                                className="max-h-72 rounded-3xl mx-auto shadow-2xl border border-gray-800 object-cover"
+                            />
+                        )}
+
+                        {/* Embedded Timer in Cooking Mode */}
+                        <div className="max-w-xs mx-auto">
+                            <CookingTimer defaultMinutes={recipe.cook_time_minutes} />
+                        </div>
+                    </div>
+
+                    {/* Bottom Navigation Step Controls */}
+                    <div className="flex items-center justify-between border-t border-gray-800 pt-6">
+                        <button
+                            disabled={cookingStep === 0}
+                            onClick={() => setCookingStep(prev => Math.max(0, prev - 1))}
+                            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-white font-extrabold text-sm px-6 py-3.5 rounded-2xl transition-colors"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                            <span>{t('recipeDetail.prevStep')}</span>
+                        </button>
+
+                        {/* Progress dots */}
+                        <div className="flex gap-2">
+                            {recipe.steps.map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={`w-3 h-3 rounded-full transition-all ${i === cookingStep ? 'bg-brand-500 scale-125' : 'bg-gray-800'}`}
+                                />
+                            ))}
+                        </div>
+
+                        <button
+                            disabled={cookingStep === recipe.steps.length - 1}
+                            onClick={() => setCookingStep(prev => Math.min(recipe.steps.length - 1, prev + 1))}
+                            className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white font-extrabold text-sm px-6 py-3.5 rounded-2xl shadow-orange-glow transition-all"
+                        >
+                            <span>{t('recipeDetail.nextStep')}</span>
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                </div>
+            )}
+
+        </div>
+    );
+}

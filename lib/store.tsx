@@ -56,7 +56,14 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLanguage] = useState<Language>('ar');
+    const [language, setLanguageState] = useState<Language>('ar');
+
+    const setLanguage = useCallback((lang: Language) => {
+        setLanguageState(lang);
+        if (typeof document !== 'undefined') {
+            document.cookie = `chef_lang=${lang}; path=/; max-age=31536000; samesite=lax`;
+        }
+    }, []);
     const [favorites, setFavorites] = useState<string[]>([]);
     const [user, setUser] = useState<UserProfile | null>(null);
     const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
@@ -470,6 +477,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
                     // Recalculate rating_avg and rating_count for the recipe
                     if (newRev.recipe_id && newRev.rating && newRev.rating > 0) {
+                        await supabase
+                            .rpc('recalc_recipe_rating', { p_recipe_id: newRev.recipe_id })
+                            .then();
+
+                        // Update local state immediately
                         const { data: allRevs } = await supabase
                             .from('reviews')
                             .select('rating')
@@ -482,12 +494,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                             const avg = parseFloat((total / allRevs.length).toFixed(2));
                             const count = allRevs.length;
 
-                            await supabase
-                                .from('recipes')
-                                .update({ rating_avg: avg, rating_count: count })
-                                .eq('id', newRev.recipe_id);
-
-                            // Update local state immediately
                             setRecipes(prev => prev.map(r =>
                                 r.id === newRev.recipe_id
                                     ? { ...r, rating_avg: avg, rating_count: count }

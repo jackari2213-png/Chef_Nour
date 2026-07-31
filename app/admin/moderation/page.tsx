@@ -4,10 +4,22 @@ import React from 'react';
 import { MessageSquare, Check, X, Star } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
+import { useToast } from '@/lib/toast';
 
 export default function AdminModerationPage() {
     const { t, getLocalizedField } = useTranslation();
     const { reviews, approveReview, rejectReview } = useApp();
+    const { success, error } = useToast();
+
+    const handleApprove = (id: string) => {
+        approveReview(id);
+        success(t('admin.approvedToast'));
+    };
+
+    const handleReject = (id: string) => {
+        rejectReview(id);
+        error(t('admin.rejectedToast'));
+    };
 
     return (
         <div className="space-y-6 text-right">
@@ -36,14 +48,14 @@ export default function AdminModerationPage() {
                                 {rev.moderation_status === 'pending' && (
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => approveReview(rev.id)}
+                                            onClick={() => handleApprove(rev.id)}
                                             className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-colors flex items-center gap-1"
                                         >
                                             <Check className="w-4 h-4" />
                                             <span>{t('admin.approve')}</span>
                                         </button>
                                         <button
-                                            onClick={() => rejectReview(rev.id)}
+                                            onClick={() => handleReject(rev.id)}
                                             className="bg-red-950 text-red-400 hover:bg-red-600 hover:text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-colors flex items-center gap-1"
                                         >
                                             <X className="w-4 h-4" />

@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/lib/store';
 import { Review } from '@/types';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
+import { useToast } from '@/lib/toast';
 import { useTranslation } from '@/lib/useTranslation';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -259,6 +260,7 @@ interface NewCommentFormProps {
 function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
     const { t } = useTranslation();
     const { user, addReview } = useApp();
+    const toast = useToast();
     const [text, setText] = useState('');
     const [rating, setRating] = useState(5);
     const [hoverRating, setHoverRating] = useState(0);
@@ -307,6 +309,7 @@ function NewCommentForm({ recipeId, recipeTitle }: NewCommentFormProps) {
 
         setDone(true);
         setText('');
+        toast.success(t('recipeDetail.reviewSubmitted'));
         setTimeout(() => setDone(false), 3500);
     };
 

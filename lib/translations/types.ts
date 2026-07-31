@@ -17,6 +17,10 @@ export interface TranslationDict {
     readMore: string;
     showLess: string;
   };
+  connectivity: {
+    offlineTitle: string;
+    offlineDesc: string;
+  };
   nav: {
     home: string;
     recipes: string;
@@ -117,6 +121,41 @@ export interface TranslationDict {
     noRating: string;
     report: string;
     share: string;
+    breadcrumbHome: string;
+    breadcrumbRecipes: string;
+    print: string;
+    saveRecipe: string;
+    saved: string;
+    byChef: string;
+    views: string;
+    prepTime: string;
+    cookTime: string;
+    servings: string;
+    difficulty: string;
+    minutes: string;
+    persons: string;
+    easy: string;
+    medium: string;
+    hard: string;
+    selectAll: string;
+    unselectAll: string;
+    cookingMode: string;
+    focusMode: string;
+    ingredientsSection: string;
+    stepsSection: string;
+    stepsCount: string;
+    stepXofY: string;
+    prevStep: string;
+    nextStep: string;
+    communityTitle: string;
+    communityDesc: string;
+    notFound: string;
+    notFoundDesc: string;
+    browseOthers: string;
+    shareCopied: string;
+    favoriteAdded: string;
+    favoriteRemoved: string;
+    reviewSubmitted: string;
   };
   footer: {
     description: string;
@@ -240,6 +279,11 @@ export interface TranslationDict {
     };
     infoTitle: string;
     emailInfo: string;
+    phoneInfo: string;
+    addressInfo: string;
+    emailCardLabel: string;
+    phoneCardLabel: string;
+    addressCardLabel: string;
     socialTitle: string;
   };
   search: {
@@ -295,6 +339,8 @@ export interface TranslationDict {
   category: {
     recipesIn: string;
     noRecipes: string;
+    backAll: string;
+    desc: string;
   };
   comments: {
     title: string;
@@ -350,6 +396,9 @@ export interface TranslationDict {
     noPendingReviews: string;
     approve: string;
     reject: string;
+    approvedToast: string;
+    rejectedToast: string;
+    deletedToast: string;
     delete: string;
     confirmDelete: string;
     addCategory: string;
@@ -452,6 +501,8 @@ export interface TranslationDict {
     alert: string;
   };
   errors: {
+    genericTitle: string;
+    genericDesc: string;
     notFound: string;
     notFoundDesc: string;
     goHome: string;
@@ -468,5 +519,11 @@ export interface TranslationDict {
     ogLocaleAr: string;
     ogLocaleFr: string;
     ogLocaleEn: string;
+  };
+  notFound: {
+    title: string;
+    desc: string;
+    homeBtn: string;
+    recipesBtn: string;
   };
 }

@@ -15,9 +15,9 @@ export default function ContactPage() {
     };
 
     const contactCards = [
-        { icon: Mail, label: t('contact.emailInfo'), value: 'contact@chefnour.ma', href: 'mailto:contact@chefnour.ma', borderColor: 'hover:border-brand-300' },
-        { icon: Phone, label: t('contact.emailInfo'), value: '+212 6 00 00 00 00', href: 'tel:+212600000000', borderColor: 'hover:border-emerald-300' },
-        { icon: MapPin, label: t('contact.emailInfo'), value: 'الدار البيضاء، المملكة المغربية', href: null, borderColor: 'hover:border-blue-300' },
+        { icon: Mail, label: t('contact.emailCardLabel'), value: t('contact.emailInfo'), href: 'mailto:contact@chefnour.ma', borderColor: 'hover:border-brand-300' },
+        { icon: Phone, label: t('contact.phoneCardLabel'), value: t('contact.phoneInfo'), href: 'tel:+212600000000', borderColor: 'hover:border-emerald-300' },
+        { icon: MapPin, label: t('contact.addressCardLabel'), value: t('contact.addressInfo'), href: null, borderColor: 'hover:border-blue-300' },
     ];
 
     return (

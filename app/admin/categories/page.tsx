@@ -16,12 +16,14 @@ import {
     Utensils
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
+import { useToast } from '@/lib/toast';
 import { Category } from '@/types';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useTranslation } from '@/lib/useTranslation';
 
 export default function AdminCategoriesPage() {
     const { t } = useTranslation();
+    const toast = useToast();
     const { categories, recipes, addCategory, updateCategory, deleteCategory } = useApp();
     const [search, setSearch] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -102,7 +104,7 @@ export default function AdminCategoriesPage() {
             resetForm();
             setTimeout(() => setSuccessMessage(''), 4000);
         } catch (err) {
-            alert(t('admin.categorySaveError'));
+            toast.error(t('admin.categorySaveError'));
         } finally {
             setIsSubmitting(false);
         }
@@ -187,6 +189,7 @@ export default function AdminCategoriesPage() {
                                     onClick={() => {
                                         if (confirm(t('admin.confirmDeleteCategory', { name: cat.name_ar }))) {
                                             deleteCategory(cat.id);
+                                            toast.success(t('admin.deletedToast'));
                                         }
                                     }}
                                     className="p-2 text-red-400 hover:text-white bg-red-950/60 hover:bg-red-600 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"

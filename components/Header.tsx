@@ -191,16 +191,60 @@ export default function Header() {
                             {/* User Profile / Admin */}
                             <div className="relative">
                                 {user ? (
-                                    <button
-                                        onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                                        className="p-1 rounded-full text-gray-700 hover:text-brand-600 transition-colors"
-                                    >
-                                        <img
-                                            src={user.avatar_url || (user.role === 'admin' ? '/chef-nour.jpg' : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.full_name)}&backgroundColor=f97316`)}
-                                            alt={user.full_name}
-                                            className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-500"
-                                        />
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                                            className="p-1 rounded-full text-gray-700 hover:text-brand-600 transition-colors"
+                                        >
+                                            <img
+                                                src={user.avatar_url || (user.role === 'admin' ? '/chef-nour.jpg' : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.full_name)}&backgroundColor=f97316`)}
+                                                alt={user.full_name}
+                                                className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-500"
+                                            />
+                                        </button>
+
+                                        {userDropdownOpen && (
+                                            <div className="absolute top-full left-0 mt-2 w-52 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                                                <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                                                    <span className="block text-xs font-extrabold text-gray-900 truncate">{user.full_name}</span>
+                                                    <span className="text-[10px] text-gray-400 font-medium truncate block">{user.email}</span>
+                                                </div>
+                                                <Link
+                                                    href="/profile"
+                                                    onClick={() => setUserDropdownOpen(false)}
+                                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors"
+                                                >
+                                                    <User className="w-4 h-4" />
+                                                    {t('nav.myAccount')}
+                                                </Link>
+                                                <Link
+                                                    href="/favorites"
+                                                    onClick={() => setUserDropdownOpen(false)}
+                                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-brand-50 hover:text-red-500 transition-colors"
+                                                >
+                                                    <Heart className="w-4 h-4" />
+                                                    {t('nav.favorites')}
+                                                </Link>
+                                                {user.role === 'admin' && (
+                                                    <Link
+                                                        href="/admin"
+                                                        onClick={() => setUserDropdownOpen(false)}
+                                                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors"
+                                                    >
+                                                        <ChefHat className="w-4 h-4" />
+                                                        {t('nav.adminPanel')}
+                                                    </Link>
+                                                )}
+                                                <button
+                                                    onClick={() => { logout(); setUserDropdownOpen(false); }}
+                                                    className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 transition-colors"
+                                                >
+                                                    <LogOut className="w-4 h-4" />
+                                                    {t('auth.logout')}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
                                 ) : (
                                     <Link
                                         href="/login"

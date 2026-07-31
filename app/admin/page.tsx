@@ -19,6 +19,7 @@ import {
     Upload,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
+import { useToast } from '@/lib/toast';
 import { MOCK_CATEGORIES } from '@/lib/mock-data';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useTranslation } from '@/lib/useTranslation';
@@ -28,6 +29,7 @@ interface StepRow { id: string; step_number: number; instruction_ar: string; ima
 
 export default function AdminDashboardPage() {
     const { t } = useTranslation();
+    const toast = useToast();
     const { reviews, approveReview, rejectReview, recipes, addRecipe, orders, categories } = useApp();
     const pendingReviews = reviews.filter(r => r.moderation_status === 'pending');
     const totalViews = recipes.reduce((sum, r) => sum + (r.views_count || 0), 0);
@@ -116,7 +118,7 @@ export default function AdminDashboardPage() {
         e.preventDefault();
         if (!title.trim() || !description.trim()) return;
         if (steps.some(s => !s.instruction_ar.trim())) {
-            alert(t('admin.fillAllSteps'));
+            toast.error(t('admin.fillAllSteps'));
             return;
         }
 
@@ -239,11 +241,11 @@ export default function AdminDashboardPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
-                                        <button onClick={() => approveReview(rev.id)}
+                                        <button onClick={() => { approveReview(rev.id); toast.success(t('admin.approvedToast')); }}
                                             className="w-9 h-9 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white flex items-center justify-center transition-colors" title={t('admin.approve')}>
                                             <Check className="w-4 h-4" />
                                         </button>
-                                        <button onClick={() => rejectReview(rev.id)}
+                                        <button onClick={() => { rejectReview(rev.id); toast.error(t('admin.rejectedToast')); }}
                                             className="w-9 h-9 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-400 hover:text-white flex items-center justify-center transition-colors" title={t('admin.reject')}>
                                             <X className="w-4 h-4" />
                                         </button>

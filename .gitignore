@@ -8,6 +8,9 @@
 /out/
 /build
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Environment files & Secrets
 .env
 .env*.local

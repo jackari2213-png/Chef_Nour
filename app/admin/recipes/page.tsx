@@ -16,6 +16,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
+import { useToast } from '@/lib/toast';
 import { Recipe } from '@/types';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useTranslation } from '@/lib/useTranslation';
@@ -25,6 +26,7 @@ interface StepRow { id: string; step_number: number; instruction_ar: string; ima
 
 export default function AdminRecipesPage() {
     const { t } = useTranslation();
+    const toast = useToast();
     const { recipes, deleteRecipe, updateRecipe, categories } = useApp();
     const [search, setSearch] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -117,8 +119,9 @@ export default function AdminRecipesPage() {
             setSuccessMessage(t('admin.recipeUpdated', { title }));
             setEditingRecipe(null);
             setTimeout(() => setSuccessMessage(''), 4000);
+            toast.success(t('admin.recipeUpdated', { title }));
         } catch (err) {
-            alert(t('admin.saveError'));
+            toast.error(t('admin.saveError'));
         } finally {
             setIsSaving(false);
         }
@@ -222,6 +225,7 @@ export default function AdminRecipesPage() {
                                                 onClick={() => {
                                                     if (confirm(t('admin.confirmDelete', { title: r.title_ar }))) {
                                                         deleteRecipe(r.id);
+                                                        toast.success(t('admin.deletedToast'));
                                                     }
                                                 }}
                                                 className="p-2 text-red-400 hover:text-white bg-red-950/60 hover:bg-red-600 rounded-lg transition-colors"

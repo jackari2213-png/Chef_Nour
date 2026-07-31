@@ -1,57 +1,98 @@
-'use client';
+import React from 'react';
+import type { Metadata } from 'next';
+import { getCategoryBySlug, getServerLanguage, localizedValue } from '@/lib/server-data';
+import CategoryDetailClient from './CategoryDetailClient';
 
-import React, { use } from 'react';
-import Link from 'next/link';
-import { ArrowRight, Utensils } from 'lucide-react';
-import { useApp } from '@/lib/store';
-import RecipeCard from '@/components/RecipeCard';
+interface Props {
+    params: Promise<{ slug: string }>;
+}
 
-export default function CategoryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
-    const { recipes, categories } = useApp();
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://chefnour.ma';
+const SITE_NAME = 'الشيف نور | CHEF NOUR';
 
-    const category = categories.find(c => c.slug === slug) || categories[0];
-    const categoryRecipes = recipes.filter(r => r.category_id === category.id || r.category_name_ar === category.name_ar);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params;
+    const lang = await getServerLanguage();
+    const category = await getCategoryBySlug(slug);
+
+    if (!category) {
+        return {
+            title: `${SITE_NAME} — ${lang === 'fr' ? 'Catégorie' : lang === 'en' ? 'Category' : 'قسم'}`,
+        };
+    }
+
+    const name = localizedValue(category, 'name', lang);
+    const url = `${SITE_URL}/category/${category.slug}`;
+    const siteSuffix = lang === 'fr' ? '| CHEF NOUR — Recettes marocaines authentiques' : lang === 'en' ? '| CHEF NOUR — Authentic Moroccan Recipes' : '| الشيف نور — وصفات مغربية أصيلة';
+
+    return {
+        title: `${name} ${siteSuffix}`,
+        description: lang === 'fr'
+            ? `Découvrez toutes nos recettes de ${name} — testées et réussies 100%.`
+            : lang === 'en'
+                ? `Discover all our ${name} recipes — 100% tested and proven.`
+                : `اكتشفي جميع وصفات ${name} — مجربة وناجحة 100% بمقادير مضبوطة.`,
+        keywords: [name, 'وصفات مغربية', 'الشيف نور', 'طبخ مغربي'],
+        alternates: { canonical: url },
+        openGraph: {
+            title: `${name} ${siteSuffix}`,
+            description: lang === 'fr'
+                ? `Découvrez toutes nos recettes de ${name}.`
+                : lang === 'en'
+                    ? `Discover all our ${name} recipes.`
+                    : `اكتشفي جميع وصفات ${name}.`,
+            url,
+            images: [{ url: category.image_url, width: 1200, height: 630, alt: name }],
+            locale: lang === 'fr' ? 'fr_FR' : lang === 'en' ? 'en_US' : 'ar_MA',
+            type: 'website',
+            siteName: SITE_NAME,
+        },
+    };
+}
+
+function buildCollectionJsonLd(category: Awaited<ReturnType<typeof getCategoryBySlug>>, lang: 'ar' | 'fr' | 'en', url: string) {
+    if (!category) return null;
+    const homeLabel = lang === 'fr' ? 'Accueil' : lang === 'en' ? 'Home' : 'الرئيسية';
+    const recipesLabel = lang === 'fr' ? 'Recettes' : lang === 'en' ? 'Recipes' : 'الوصفات';
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: localizedValue(category, 'name', lang),
+        description: lang === 'fr'
+            ? `Découvrez toutes nos recettes de ${localizedValue(category, 'name', lang)}.`
+            : lang === 'en'
+                ? `Discover all our ${localizedValue(category, 'name', lang)} recipes.`
+                : `اكتشفي جميع وصفات ${localizedValue(category, 'name', lang)}.`,
+        url,
+        image: category.image_url,
+        breadcrumb: {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                { '@type': 'ListItem', position: 1, name: homeLabel, item: `${SITE_URL}/` },
+                { '@type': 'ListItem', position: 2, name: recipesLabel, item: `${SITE_URL}/recipes` },
+                { '@type': 'ListItem', position: 3, name: localizedValue(category, 'name', lang), item: url },
+            ],
+        },
+        mainEntity: {
+            '@type': 'ItemList',
+            itemListElement: [],
+        },
+    };
+}
+
+export default async function CategoryDetailPage({ params }: Props) {
+    const { slug } = await params;
+    const lang = await getServerLanguage();
+    const category = await getCategoryBySlug(slug);
+    const url = `${SITE_URL}/category/${slug}`;
+    const collectionJsonLd = buildCollectionJsonLd(category, lang, url);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-
-            {/* Category Hero Banner */}
-            <div className="relative rounded-3xl overflow-hidden bg-gray-900 text-white p-8 sm:p-12 shadow-xl border border-gray-800">
-                <img
-                    src={category.image_url}
-                    alt={category.name_ar}
-                    className="absolute inset-0 w-full h-full object-cover opacity-35"
-                />
-                <div className="relative z-10 space-y-3 max-w-xl text-right">
-                    <Link href="/recipes" className="inline-flex items-center gap-1 text-xs font-bold text-brand-400 hover:underline mb-2">
-                        <ArrowRight className="w-4 h-4" />
-                        <span>العودة لجميع الوصفات</span>
-                    </Link>
-                    <h1 className="text-3xl sm:text-5xl font-black">{category.name_ar}</h1>
-                    <p className="text-sm text-gray-200 font-medium">
-                        استكشفي أحدث وأشهى وصفات قسم {category.name_ar} المضمونة والمجربة من مطبخ الشيف نور.
-                    </p>
-                    <span className="inline-block text-xs font-extrabold bg-brand-500 text-white px-3 py-1 rounded-full">
-                        {categoryRecipes.length} وصفة متاحة
-                    </span>
-                </div>
-            </div>
-
-            {/* Grid */}
-            {categoryRecipes.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    {categoryRecipes.map(recipe => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
-                    ))}
-                </div>
-            ) : (
-                <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm max-w-md mx-auto">
-                    <Utensils className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <h3 className="font-bold text-gray-800">لا توجد وصفات حالياً في هذا القسم</h3>
-                </div>
+        <>
+            {collectionJsonLd && (
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
             )}
-
-        </div>
+            <CategoryDetailClient params={params} initialCategory={category} />
+        </>
     );
 }

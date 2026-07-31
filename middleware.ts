@@ -29,19 +29,16 @@ async function updateSession(request: NextRequest) {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (request.nextUrl.pathname.startsWith('/admin')) {
-            if (!user) {
-                const loginUrl = new URL('/login', request.url);
-                return NextResponse.redirect(loginUrl);
-            }
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .maybeSingle();
 
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .maybeSingle();
-
-            if (!profile || profile.role !== 'admin') {
-                return NextResponse.redirect(new URL('/', request.url));
+                if (!profile || profile.role !== 'admin') {
+                    return NextResponse.redirect(new URL('/', request.url));
+                }
             }
         }
     }

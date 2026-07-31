@@ -15,7 +15,7 @@ import CategoryCard from '@/components/CategoryCard';
 import CommentThread from '@/components/CommentThread';
 import AnimatedSection from '@/components/AnimatedSection';
 
-function Counter({ value, suffix = '' }: { value: number; suffix?: string }) {
+function Counter({ value, suffix = '', compact }: { value: number; suffix?: string; compact?: string }) {
     const [count, setCount] = useState(0);
     useEffect(() => {
         let start = 0;
@@ -27,7 +27,12 @@ function Counter({ value, suffix = '' }: { value: number; suffix?: string }) {
         }, 40);
         return () => clearInterval(interval);
     }, [value]);
-    return <span>{count.toLocaleString()}{suffix}</span>;
+    return (
+        <span>
+            <span className="inline sm:hidden">{compact || (value >= 1000000 ? `${(value / 1000000).toFixed(0)}M` : value >= 1000 ? `${(value / 1000).toFixed(0)}K` : count)}{suffix}</span>
+            <span className="hidden sm:inline">{count.toLocaleString()}{suffix}</span>
+        </span>
+    );
 }
 
 export default function HomePage() {
@@ -106,18 +111,18 @@ export default function HomePage() {
                                 {t('home.heroDesc2')}
                             </p>
 
-                            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-md pt-2">
-                                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all">
-                                    <span className="block text-xl sm:text-2xl font-black text-brand-500"><Counter value={3000000} suffix="+" /></span>
-                                    <span className="text-[11px] sm:text-xs font-bold text-gray-400">{t('home.statsMonthly')}</span>
+                            <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-md pt-2">
+                                <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all overflow-hidden">
+                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap"><Counter value={3000000} suffix="+" compact="+3M" /></span>
+                                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 block truncate">{t('home.statsMonthly')}</span>
                                 </div>
-                                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all">
-                                    <span className="block text-xl sm:text-2xl font-black text-brand-500"><Counter value={500} suffix="+" /></span>
-                                    <span className="text-[11px] sm:text-xs font-bold text-gray-400">{t('home.statsRecipes')}</span>
+                                <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all overflow-hidden">
+                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap"><Counter value={500} suffix="+" compact="+500" /></span>
+                                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 block truncate">{t('home.statsRecipes')}</span>
                                 </div>
-                                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all">
-                                    <span className="block text-xl sm:text-2xl font-black text-brand-500"><Counter value={171000} suffix="" /></span>
-                                    <span className="text-[11px] sm:text-xs font-bold text-gray-400">{t('home.statsFollowers')}</span>
+                                <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all overflow-hidden">
+                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap"><Counter value={171000} suffix="" compact="171K" /></span>
+                                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 block truncate">{t('home.statsFollowers')}</span>
                                 </div>
                             </div>
 

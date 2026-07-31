@@ -33,6 +33,7 @@ import { useToast } from '@/lib/toast';
 import type { Recipe } from '@/types';
 import RecipeCard from '@/components/RecipeCard';
 import CookingTimer from '@/components/CookingTimer';
+import CookingLoader from '@/components/CookingLoader';
 import CommentThread from '@/components/CommentThread';
 import { useTranslation } from '@/lib/useTranslation';
 
@@ -66,7 +67,7 @@ export default function RecipeDetailClient({ params, initialRecipe }: { params: 
     if (isLoading) {
         return (
             <div className="min-h-[70vh] flex items-center justify-center">
-                <CookingLoader size="lg" text="جارٍ تحضير تفاصيل الوصفة..." />
+                <CookingLoader size="lg" text={t('common.loading')} />
             </div>
         );
     }

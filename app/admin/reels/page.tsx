@@ -188,7 +188,7 @@ export default function AdminReelsPage() {
                             </div>
                         </div>
                         <div>
-                            <label className="text-xs font-bold text-gray-700 block mb-1 flex items-center gap-1"><Link2 className="w-3 h-3" /> رابط الفيديو (YouTube / TikTok) *</label>
+                            <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1"><Link2 className="w-3 h-3" /> رابط الفيديو (YouTube / TikTok) *</label>
                             <input type="url" required className={input} value={form.video_url}
                                 onChange={e => setForm(f => ({ ...f, video_url: e.target.value }))} placeholder="https://youtube.com/shorts/..." />
                         </div>
@@ -199,7 +199,7 @@ export default function AdminReelsPage() {
                                     onChange={e => setForm(f => ({ ...f, thumbnail_url: e.target.value }))} placeholder="https://..." />
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-700 block mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> المدة (بالثواني)</label>
+                                <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> المدة (بالثواني)</label>
                                 <input type="number" className={input} value={form.duration_seconds || ''}
                                     onChange={e => setForm(f => ({ ...f, duration_seconds: parseInt(e.target.value) || undefined }))} placeholder="60" />
                             </div>

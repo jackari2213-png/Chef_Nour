@@ -192,7 +192,7 @@ export default function Footer() {
                             {t('footer.recipeSections')}
                         </h3>
                         <ul className="space-y-3">
-                            {(categories.length > 0 ? categories : MOCK_CATEGORIES).slice(0, 7).map((cat) => {
+                            {(categories.length > 0 ? categories : MOCK_CATEGORIES).map((cat) => {
                                 const realCount = recipes.filter(r => r.category_id === cat.id || r.category_name_ar === cat.name_ar).length;
                                 return (
                                     <li key={cat.id}>

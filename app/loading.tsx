@@ -1,13 +1,10 @@
 import React from 'react';
+import CookingLoader from '@/components/CookingLoader';
 
 export default function Loading() {
     return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-            <div className="relative w-14 h-14">
-                <div className="absolute inset-0 rounded-full border-4 border-brand-100" />
-                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-brand-500 animate-spin" />
-            </div>
-            <p className="text-xs font-bold text-gray-400 animate-pulse">Chef Nour</p>
+        <div className="min-h-[65vh] flex items-center justify-center p-4">
+            <CookingLoader size="lg" text="الشيف نور... يُحَضَّر لك كل ما هو شهي ✨" />
         </div>
     );
 }

@@ -255,6 +255,108 @@ body {
   animation: cookSpin 12s linear infinite;
 }
 
+/* ─── Cooking Pan & Flame Loader Keyframes ────────────────────────────────────── */
+@keyframes panTilt {
+
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+
+  25% {
+    transform: rotate(-6deg) translateY(-3px);
+  }
+
+  75% {
+    transform: rotate(6deg) translateY(-2px);
+  }
+}
+
+@keyframes flameFlicker {
+
+  0%,
+  100% {
+    transform: scale(1) translateY(0) rotate(0deg);
+    opacity: 0.95;
+  }
+
+  25% {
+    transform: scale(1.15) translateY(-4px) rotate(-4deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(0.9) translateY(1px) rotate(3deg);
+    opacity: 0.85;
+  }
+
+  75% {
+    transform: scale(1.2) translateY(-6px) rotate(2deg);
+    opacity: 1;
+  }
+}
+
+@keyframes steamRise {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0;
+  }
+
+  40% {
+    transform: translateY(-12px) scale(1.1);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translateY(-28px) scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes heatGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(245, 124, 0, 0.3), 0 0 30px rgba(239, 108, 0, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 25px rgba(245, 124, 0, 0.6), 0 0 50px rgba(239, 108, 0, 0.3);
+  }
+}
+
+.anim-pan-tilt {
+  animation: panTilt 2.2s ease-in-out infinite;
+}
+
+.anim-flame-1 {
+  animation: flameFlicker 1.2s ease-in-out infinite;
+}
+
+.anim-flame-2 {
+  animation: flameFlicker 1.5s ease-in-out infinite 0.3s;
+}
+
+.anim-flame-3 {
+  animation: flameFlicker 1.1s ease-in-out infinite 0.6s;
+}
+
+.anim-steam-1 {
+  animation: steamRise 2s ease-out infinite;
+}
+
+.anim-steam-2 {
+  animation: steamRise 2s ease-out infinite 0.7s;
+}
+
+.anim-steam-3 {
+  animation: steamRise 2s ease-out infinite 1.3s;
+}
+
+.anim-heat-glow {
+  animation: heatGlow 2s ease-in-out infinite;
+}
+
 /* ─── Print Styles ───────────────────────────────────────────────────────────── */
 @media print {
 

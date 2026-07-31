@@ -22,6 +22,7 @@ import { useApp } from '@/lib/store';
 import { isSupabaseConfigured } from '@/lib/supabase-client';
 import { supabaseSignIn, supabaseSignOut } from '@/lib/useAuth';
 import { useTranslation } from '@/lib/useTranslation';
+import CookingLoader from '@/components/CookingLoader';
 
 const ADMIN_EMAIL = 'nour@chefnour.com';
 

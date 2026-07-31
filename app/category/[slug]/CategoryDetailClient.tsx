@@ -15,7 +15,11 @@ export default function CategoryDetailClient({ params, initialCategory }: { para
     const { t, getLocalizedField } = useTranslation();
 
     const category = initialCategory ?? categories.find(c => c.slug === slug) ?? categories[0];
-    const categoryRecipes = recipes.filter(r => r.category_id === category.id || r.category_name_ar === category.name_ar);
+    const categoryRecipes = recipes.filter(
+        r => r.category_id === category.id ||
+            r.category_name_ar === category.name_ar ||
+            (category.slug === 'ramadan' && (r.category_name_ar === 'رمضان' || r.category_id === 'cat-3'))
+    );
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">

@@ -15,7 +15,7 @@ import CategoryCard from '@/components/CategoryCard';
 import CommentThread from '@/components/CommentThread';
 import AnimatedSection from '@/components/AnimatedSection';
 
-function Counter({ value, suffix = '', compact }: { value: number; suffix?: string; compact?: string }) {
+function Counter({ value, prefix = '', suffix = '', compact }: { value: number; prefix?: string; suffix?: string; compact?: string }) {
     const [count, setCount] = useState(0);
     useEffect(() => {
         let start = 0;
@@ -28,9 +28,9 @@ function Counter({ value, suffix = '', compact }: { value: number; suffix?: stri
         return () => clearInterval(interval);
     }, [value]);
     return (
-        <span>
-            <span className="inline sm:hidden">{compact || (value >= 1000000 ? `${(value / 1000000).toFixed(0)}M` : value >= 1000 ? `${(value / 1000).toFixed(0)}K` : count)}{suffix}</span>
-            <span className="hidden sm:inline">{count.toLocaleString()}{suffix}</span>
+        <span dir="ltr" className="inline-block font-mono">
+            <span className="inline sm:hidden">{compact || (value >= 1000000 ? `+${(value / 1000000).toFixed(0)}M` : value >= 1000 ? `+${(value / 1000).toFixed(0)}K` : `+${count}`)}</span>
+            <span className="hidden sm:inline">{prefix}{count.toLocaleString()}{suffix}</span>
         </span>
     );
 }
@@ -113,15 +113,15 @@ export default function HomePage() {
 
                             <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-md pt-2">
                                 <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all overflow-hidden">
-                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap"><Counter value={3000000} suffix="+" compact="+3M" /></span>
+                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap" dir="ltr"><Counter value={3000000} prefix="+" compact="+3M" /></span>
                                     <span className="text-[10px] sm:text-xs font-bold text-gray-400 block truncate">{t('home.statsMonthly')}</span>
                                 </div>
                                 <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all overflow-hidden">
-                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap"><Counter value={500} suffix="+" compact="+500" /></span>
+                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap" dir="ltr"><Counter value={500} prefix="+" compact="+500" /></span>
                                     <span className="text-[10px] sm:text-xs font-bold text-gray-400 block truncate">{t('home.statsRecipes')}</span>
                                 </div>
                                 <div className="bg-white p-2.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-brand-100 transition-all overflow-hidden">
-                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap"><Counter value={171000} suffix="" compact="171K" /></span>
+                                    <span className="block text-lg sm:text-2xl font-black text-brand-500 whitespace-nowrap" dir="ltr"><Counter value={171000} compact="171K" /></span>
                                     <span className="text-[10px] sm:text-xs font-bold text-gray-400 block truncate">{t('home.statsFollowers')}</span>
                                 </div>
                             </div>

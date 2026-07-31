@@ -5,13 +5,24 @@ import Link from 'next/link';
 import { Category } from '@/types';
 import { useTranslation } from '@/lib/useTranslation';
 
+import { useApp } from '@/lib/store';
+
 interface CategoryCardProps {
     category: Category;
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
     const { t, getLocalizedField } = useTranslation();
+    const { recipes } = useApp();
     const [imgLoaded, setImgLoaded] = useState(false);
+
+    const realCount = recipes.filter(
+        r => r.category_id === category.id ||
+            r.category_name_ar === category.name_ar ||
+            (category.slug === 'ramadan' && (r.category_name_ar === 'رمضان' || r.category_id === 'cat-3'))
+    ).length;
+
+    const displayCount = realCount > 0 ? realCount : category.recipe_count;
 
     return (
         <Link
@@ -36,7 +47,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
             </span>
 
             <span className="text-[11px] font-semibold text-gray-400 bg-gray-50/80 group-hover:bg-brand-50 group-hover:text-brand-600 group-hover:font-extrabold px-2.5 py-0.5 rounded-full transition-all">
-                {category.recipe_count}
+                {displayCount} {t('category.recipesCountSuffix') || 'وصفة'}
             </span>
         </Link>
     );

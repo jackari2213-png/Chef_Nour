@@ -193,7 +193,12 @@ export default function Footer() {
                         </h3>
                         <ul className="space-y-3">
                             {(categories.length > 0 ? categories : MOCK_CATEGORIES).map((cat) => {
-                                const realCount = recipes.filter(r => r.category_id === cat.id || r.category_name_ar === cat.name_ar).length;
+                                const realCount = recipes.filter(
+                                    r => r.category_id === cat.id ||
+                                        r.category_name_ar === cat.name_ar ||
+                                        (cat.slug === 'ramadan' && (r.category_name_ar === 'رمضان' || r.category_id === 'cat-3'))
+                                ).length;
+                                const displayCount = realCount > 0 ? realCount : cat.recipe_count;
                                 return (
                                     <li key={cat.id}>
                                         <Link
@@ -202,7 +207,7 @@ export default function Footer() {
                                         >
                                             <div className="w-1.5 h-1.5 rounded-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                             {getLocalizedField(cat, 'name')}
-                                            <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded-full text-gray-500 mr-auto">{realCount || cat.recipe_count}</span>
+                                            <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-full text-gray-400 group-hover:text-brand-400 group-hover:bg-brand-500/10 mr-auto font-mono">{displayCount}</span>
                                         </Link>
                                     </li>
                                 );

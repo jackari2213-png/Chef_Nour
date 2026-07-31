@@ -19,6 +19,8 @@ interface AppContextType {
     setUser: (user: UserProfile | null) => void;  // exposed so admin login gate can set it directly
     login: (email: string, role?: 'user' | 'admin') => void; // legacy — kept for compatibility
     logout: () => Promise<void>;
+    updateProfile: (fields: { full_name?: string; avatar_url?: string }) => Promise<void>;
+    subscribeNewsletter: (email: string) => Promise<'success' | 'exists' | 'error'>;
 
     // Categories Management
     categories: Category[];
@@ -216,6 +218,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const logout = async () => {
         await supabaseSignOut();
         setUser(null);
+    };
+
+    // ─── Profile Update ───────────────────────────────────────────────────────
+    const updateProfile = async (fields: { full_name?: string; avatar_url?: string }) => {
+        if (!user) return;
+        const updated = { ...user, ...fields };
+        setUser(updated);
+        if (isSupabaseConfigured()) {
+            try {
+                await supabase.from('profiles').update(fields).eq('id', user.id);
+            } catch (err) {
+                console.error('Error updating profile:', err);
+            }
+        }
+    };
+
+    // ─── Newsletter Subscription ──────────────────────────────────────────────
+    const subscribeNewsletter = async (email: string): Promise<'success' | 'exists' | 'error'> => {
+        if (!isSupabaseConfigured()) return 'success'; // offline mode — just show thank you
+        try {
+            const { error } = await supabase
+                .from('newsletter_subscriptions')
+                .insert({ email: email.toLowerCase().trim() });
+            if (error) {
+                if (error.code === '23505') return 'exists'; // unique constraint
+                return 'error';
+            }
+            return 'success';
+        } catch {
+            return 'error';
+        }
     };
 
     // ─── Categories Management (with Supabase sync) ───────────────────────────
@@ -610,6 +643,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 setUser,
                 login,
                 logout,
+                updateProfile,
+                subscribeNewsletter,
                 categories,
                 addCategory,
                 updateCategory,

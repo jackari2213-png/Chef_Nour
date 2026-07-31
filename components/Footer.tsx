@@ -94,18 +94,20 @@ const IconFacebook = ({ className }: { className?: string }) => (
 export default function Footer() {
     const pathname = usePathname();
     const { t, getLocalizedField } = useTranslation();
-    const { categories, recipes } = useApp();
+    const { categories, recipes, subscribeNewsletter } = useApp();
     const [email, setEmail] = useState('');
-    const [subscribed, setSubscribed] = useState(false);
+    const [subscribeState, setSubscribeState] = useState<'idle' | 'loading' | 'success' | 'exists' | 'error'>('idle');
 
     if (pathname.startsWith('/admin')) return null;
 
-    const handleSubscribe = (e: React.FormEvent) => {
+    const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (email.trim()) {
-            setSubscribed(true);
-            setEmail('');
-        }
+        const trimmed = email.trim();
+        if (!trimmed || !trimmed.includes('@')) return;
+        setSubscribeState('loading');
+        const result = await subscribeNewsletter(trimmed);
+        setSubscribeState(result);
+        if (result === 'success') setEmail('');
     };
 
     const cookingFeatures = [
@@ -260,10 +262,14 @@ export default function Footer() {
                             <p className="text-xs text-gray-500 font-medium mb-4 leading-relaxed">
                                 {t('footer.newsletterSub')}
                             </p>
-                            {subscribed ? (
+                            {subscribeState === 'success' ? (
                                 <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl p-3 text-xs font-bold text-center flex items-center justify-center gap-2">
                                     <IconSparkle className="w-3.5 h-3.5" />
                                     {t('footer.newsletterSuccess')}
+                                </div>
+                            ) : subscribeState === 'exists' ? (
+                                <div className="bg-amber-500/10 border border-amber-400/30 text-amber-400 rounded-2xl p-3 text-xs font-bold text-center">
+                                    ✓ أنتِ مشتركة بالفعل، شكراً!
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubscribe} className="flex flex-col gap-2">
@@ -273,16 +279,27 @@ export default function Footer() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
-                                        className="bg-white/10 border border-white/10 text-white placeholder-gray-500 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 focus:bg-white/15 transition-all w-full"
+                                        disabled={subscribeState === 'loading'}
+                                        className="bg-white/10 border border-white/10 text-white placeholder-gray-500 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 focus:bg-white/15 transition-all w-full disabled:opacity-60"
                                     />
+                                    {subscribeState === 'error' && (
+                                        <p className="text-xs text-red-400 font-bold">حدث خطأ، حاولي مرة أخرى.</p>
+                                    )}
                                     <button
                                         type="submit"
-                                        className="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                        disabled={subscribeState === 'loading'}
+                                        className="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait"
                                     >
-                                        <span>{t('footer.newsletterBtn')}</span>
-                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h12M13 7l5 5-5 5" />
-                                        </svg>
+                                        {subscribeState === 'loading' ? (
+                                            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" opacity="0.25" /><path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" /></svg>
+                                        ) : (
+                                            <>
+                                                <span>{t('footer.newsletterBtn')}</span>
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h12M13 7l5 5-5 5" />
+                                                </svg>
+                                            </>
+                                        )}
                                     </button>
                                 </form>
                             )}

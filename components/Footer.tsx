@@ -198,9 +198,16 @@ export default function Footer() {
                                 const realCount = recipes.filter(
                                     r => r.category_id === cat.id ||
                                         r.category_name_ar === cat.name_ar ||
-                                        (cat.slug === 'ramadan' && (r.category_name_ar === 'رمضان' || r.category_id === 'cat-3'))
+                                        (cat.slug === 'ramadan' && (r.category_name_ar === 'رمضان' || r.category_id === 'cat-3')) ||
+                                        (cat.slug === 'moroccan' && (r.category_name_ar === 'أطباق مغربية' || r.category_id === 'cat-8')) ||
+                                        (cat.slug === 'sweets' && (r.category_name_ar === 'حلويات' || r.category_id === 'cat-1')) ||
+                                        (cat.slug === 'savory' && (r.category_name_ar === 'مملحات' || r.category_id === 'cat-5')) ||
+                                        (cat.slug === 'main-courses' && (r.category_name_ar === 'أطباق رئيسية' || r.category_id === 'cat-2')) ||
+                                        (cat.slug === 'salads' && (r.category_name_ar === 'سلطات' || r.category_id === 'cat-4')) ||
+                                        (cat.slug === 'drinks' && (r.category_name_ar === 'مشروبات' || r.category_id === 'cat-6')) ||
+                                        (cat.slug === 'breads' && (r.category_name_ar === 'خبز وعجائن' || r.category_id === 'cat-7'))
                                 ).length;
-                                const displayCount = realCount > 0 ? realCount : cat.recipe_count;
+                                const displayCount = realCount > 0 ? realCount : (cat.recipe_count || 0);
                                 return (
                                     <li key={cat.id}>
                                         <Link

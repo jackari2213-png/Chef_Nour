@@ -9,6 +9,7 @@ import {
     Grid,
     MessageSquare,
     BookOpen,
+    Film,
     LogOut,
     ChefHat,
     ArrowRight,
@@ -172,7 +173,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     // Guard: show login screen if not authenticated as admin
     if (!user || user.role !== 'admin') {
-        return <AdminLoginGate onSuccess={() => {}} />;
+        return <AdminLoginGate onSuccess={() => { }} />;
     }
 
     const navItems = [
@@ -181,6 +182,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: '/admin/categories', label: t('admin.categories'), icon: Grid },
         { href: '/admin/moderation', label: t('admin.moderation'), icon: MessageSquare },
         { href: '/admin/products', label: t('admin.products'), icon: BookOpen },
+        { href: '/admin/reels', label: 'ريلز الطبخ', icon: Film },
     ];
 
     return (

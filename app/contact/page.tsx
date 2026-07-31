@@ -1,17 +1,35 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, ChefHat, Instagram, Youtube, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Loader2, Instagram, Youtube, MessageCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/useTranslation';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase-client';
+
+type SubmitState = 'idle' | 'loading' | 'success' | 'error';
 
 export default function ContactPage() {
     const { t } = useTranslation();
-    const [submitted, setSubmitted] = useState(false);
+    const [submitState, setSubmitState] = useState<SubmitState>('idle');
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSubmitted(true);
+        setSubmitState('loading');
+        try {
+            if (isSupabaseConfigured()) {
+                const { error } = await supabase.from('contact_messages').insert({
+                    name: formData.name.trim(),
+                    email: formData.email.trim(),
+                    subject: formData.subject.trim(),
+                    message: formData.message.trim(),
+                });
+                if (error) throw error;
+            }
+            setSubmitState('success');
+            setFormData({ name: '', email: '', subject: '', message: '' });
+        } catch {
+            setSubmitState('error');
+        }
     };
 
     const contactCards = [
@@ -56,9 +74,9 @@ export default function ContactPage() {
                         <h3 className="font-extrabold text-sm text-gray-900 mb-4 text-right">{t('contact.socialTitle')}</h3>
                         <div className="flex items-center gap-3 justify-start">
                             {[
-                                { icon: Instagram, label: 'Instagram', href: '#', color: 'hover:bg-pink-500 hover:text-white hover:border-pink-500' },
-                                { icon: Youtube, label: 'YouTube', href: '#', color: 'hover:bg-red-500 hover:text-white hover:border-red-500' },
-                                { icon: MessageCircle, label: 'WhatsApp', href: '#', color: 'hover:bg-emerald-500 hover:text-white hover:border-emerald-500' },
+                                { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/chef_nour_officiel/', color: 'hover:bg-pink-500 hover:text-white hover:border-pink-500' },
+                                { icon: Youtube, label: 'YouTube', href: 'https://www.youtube.com/@ChefNour', color: 'hover:bg-red-500 hover:text-white hover:border-red-500' },
+                                { icon: MessageCircle, label: 'WhatsApp', href: 'https://wa.me/212600000000', color: 'hover:bg-emerald-500 hover:text-white hover:border-emerald-500' },
                             ].map(({ icon: Icon, label, href, color }) => (
                                 <a key={label} href={href} target="_blank" rel="noopener noreferrer"
                                     className={`w-11 h-11 rounded-2xl border border-gray-200 flex items-center justify-center text-gray-500 transition-all duration-300 hover:scale-110 ${color}`}
@@ -73,11 +91,14 @@ export default function ContactPage() {
 
                 {/* Form */}
                 <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-card text-right">
-                    {submitted ? (
+                    {submitState === 'success' ? (
                         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-8 rounded-2xl text-center space-y-3 animate-in fade-in zoom-in-95 duration-200">
                             <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
                             <h3 className="font-bold text-lg">{t('contact.successTitle')}</h3>
                             <p className="text-xs text-emerald-700">{t('contact.successDesc')}</p>
+                            <button onClick={() => setSubmitState('idle')} className="mt-2 text-xs font-bold text-emerald-700 underline">
+                                إرسال رسالة جديدة
+                            </button>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,10 +128,16 @@ export default function ContactPage() {
                                     value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })}
                                     className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all resize-none" />
                             </div>
-                            <button type="submit"
-                                className="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-orange-glow hover:shadow-lg transition-all btn-tap flex items-center justify-center gap-2">
-                                <span>{t('contact.sendBtn')}</span>
-                                <Send className="w-4 h-4" />
+                            {submitState === 'error' && (
+                                <p className="text-xs text-red-500 font-bold">حدث خطأ أثناء إرسال الرسالة. حاولي مجدداً.</p>
+                            )}
+                            <button type="submit" disabled={submitState === 'loading'}
+                                className="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs py-3.5 rounded-2xl shadow-orange-glow hover:shadow-lg transition-all btn-tap flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait">
+                                {submitState === 'loading' ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin" /><span>جارٍ الإرسال...</span></>
+                                ) : (
+                                    <><span>{t('contact.sendBtn')}</span><Send className="w-4 h-4" /></>
+                                )}
                             </button>
                         </form>
                     )}
